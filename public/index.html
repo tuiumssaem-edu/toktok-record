@@ -949,7 +949,7 @@ function scheduleSync(ms) { if (!connected()) return; clearTimeout(syncTimer); s
 function pendingCount() { return Object.keys(S.dirty).length + (S.cfgDirty ? 1 : 0); }
 
 async function syncNow() {
-  if (!connected()) { openSettings(); return; }
+  if (!connected()) { openSettings('conn'); return; }
   if (syncing) { again = true; return; }
   syncing = true; UI.status = 'syncing'; renderStatus();
   clearTimeout(retryTimer);
@@ -1557,7 +1557,7 @@ async function connectRemote() {
     S.since = 0; S.lastOk = 0;
     if (demoN) toast('샘플 데이터 ' + demoN + '건은 연결하면서 지웠습니다');
   }
-  UI.status = 'connecting'; save(); renderAll(); openSettings();
+  UI.status = 'connecting'; save(); renderAll(); openSettings('conn');
   setMsg((res.claimed ? '비밀번호를 등록하고 연결했습니다. 비밀번호를 잊지 않도록 따로 적어 두세요. ' : '연결되었습니다. ') + '시트의 기록 ' + (res.total || 0) + '건을 불러옵니다.', 'ok');
   syncNow();
 }
@@ -1570,22 +1570,24 @@ function disconnectRemote() {
   save(); renderAll(); openSettings();
   setMsg('연결을 끊었습니다. 지금은 이 기기에만 저장됩니다.', 'ok');
 }
-function openSettings() {
+function openSettings(mode) {
+  if (mode) UI.setMode = mode; else if ($('#modal').hidden) UI.setMode = 'cfg';
   const m = $('#modal'); m.hidden = false;
   const stRows = S.cfg.students.map((s) => '<div class="li"><input class="inp" data-sf="sname" data-id="' + esc(s.id) + '" value="' + esc(s.name) + '" maxlength="40"><span class="small mute">' + esc(s.alias) + '</span>' +
     '<button class="mini" data-act="archStu" data-id="' + esc(s.id) + '">' + (s.archived ? '복원' : '보관') + '</button></div>').join('');
   const bRows = S.cfg.behaviors.map((b) => '<div class="li"><input class="inp" data-sf="bname" data-id="' + esc(b.id) + '" value="' + esc(b.name) + '" maxlength="60"><span class="small mute">' + esc(b.code) + '</span>' +
     '<button class="mini" data-act="archBeh" data-id="' + esc(b.id) + '">' + (b.archived ? '복원' : '보관') + '</button></div>').join('');
-  m.innerHTML = '<div class="mbox"><div class="rowb"><h3>설정과 데이터</h3><button class="icon" data-act="closeModal">닫기</button></div><div class="mbody">' +
-    connHtml() +
+  const conn = UI.setMode === 'conn';
+  const rest =
     '<div><h4>관찰 대상 학생</h4>' + stRows + '<div class="li"><input class="inp" id="newStu" placeholder="학생 이름" maxlength="40"><button class="mini dk" data-act="addStu">추가</button></div><p class="small mute">‘보관’해도 지금까지의 기록은 그대로 남아 추이에 쓰입니다.</p></div>' +
     '<div><h4>표적 행동</h4>' + bRows + '<div class="li"><input class="inp" id="newBeh" placeholder="행동 이름 (예: 자리 이탈)" maxlength="60"><button class="mini dk" data-act="addBeh">추가</button></div></div>' +
     '<div><h4>데이터 보관</h4><p class="small mute" style="margin-bottom:8px">' + (connected() ? '모든 기록은 구글 시트의 ‘기록’ 탭에 계속 쌓입니다. 이 기기에도 함께 저장됩니다.' : '지금은 이 기기(브라우저)에만 저장됩니다. 정기적으로 백업을 받아 두세요.') + '</p>' +
     '<div style="display:flex;flex-wrap:wrap;gap:6px"><button class="mini" data-act="exportCsv">CSV 내보내기</button><button class="mini" data-act="exportJson">백업 파일(JSON) 받기</button><label class="mini" style="display:inline-flex;align-items:center;cursor:pointer">백업 복원<input type="file" id="restoreFile" accept=".json,application/json" hidden></label>' +
     (connected() ? '<button class="mini" data-act="syncNow">지금 동기화</button>' : '') + '</div>' +
     (S.url ? '<p class="small" style="margin-top:8px"><a href="' + esc(S.url) + '" target="_blank" rel="noopener">구글 시트 열기 (본인만 접근 가능)</a></p>' : '') + '</div>' +
-        '<div class="small mute">학생 정보는 민감정보입니다. 실제 학생 이름 대신 별칭을 쓰거나 ‘이름 가리기’를 활용하고, 시트는 본인만 접근하게 두고 비밀번호는 다른 사람에게 알리지 마세요. 이 앱은 ‘AI 심화 분석’ 버튼을 누를 때만, 학생 이름을 뺀 기록을 제미나이(구글 AI)로 보냅니다. 그 외에는 외부 AI·API로 데이터를 보내지 않습니다.</div>' +
-    '</div></div>';
+        '<div class="small mute">학생 정보는 민감정보입니다. 실제 학생 이름 대신 별칭을 쓰거나 ‘이름 가리기’를 활용하고, 시트는 본인만 접근하게 두고 비밀번호는 다른 사람에게 알리지 마세요. 이 앱은 ‘AI 심화 분석’ 버튼을 누를 때만, 학생 이름을 뺀 기록을 제미나이(구글 AI)로 보냅니다. 그 외에는 외부 AI·API로 데이터를 보내지 않습니다.</div>' ;
+  m.innerHTML = '<div class="mbox"><div class="rowb"><h3>' + (conn ? '구글 시트 연결' : '학생 · 표적행동 설정') + '</h3><button class="icon" data-act="closeModal">닫기</button></div><div class="mbody">' +
+    (conn ? connHtml() + (S.url ? '<p class="small" style="margin-top:8px"><a href="' + esc(S.url) + '" target="_blank" rel="noopener">구글 시트 열기 (본인만 접근 가능)</a></p>' : '') : rest) + '</div></div>';
   fillServerCode();
 }
 const csvCell = (v) => { let s = String(v == null ? '' : v); if (/^[=+\-@\t\r]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; };
@@ -1664,7 +1666,7 @@ function showCover() {
   if ($('#modal') && !$('#modal').hidden) $('#modal').hidden = true;
   const c = $('#coverStealth'); if (c) c.checked = !!S.stealth;
   const m = $('#coverMeta');
-  if (m) m.textContent = connected() ? '내 구글 시트와 연결됨' : '기록은 이 기기에만 저장 · 설정에서 구글 시트 연결';
+  if (m) m.textContent = connected() ? '내 구글 시트와 연결됨' : '기록은 이 기기에만 저장 · 위쪽 ‘기기에만 저장 중’에서 구글 시트 연결';
   $('#cover').hidden = false; document.body.classList.add('covered');
 }
 
@@ -1684,7 +1686,7 @@ const ACT = {
   showCover: () => showCover(),
   syncNow: () => syncNow(),
   stealth: () => { S.stealth = !S.stealth; save(); renderAll(); if (!$('#modal').hidden) openSettings(); },
-  openSettings: () => openSettings(),
+  openSettings: () => openSettings('cfg'),
   closeModal: () => { $('#modal').hidden = true; renderAll(); },
   step: (d) => { UI.step = Number(d.v); UI.openId = null; if (UI.step === 2) UI.day = today(); renderAll(); try { window.scrollTo(0, 0); } catch (e) { /* 무시 */ } },
   pick: (d) => { S.sid = d.v; UI.openId = null; save(); renderAll(); },
