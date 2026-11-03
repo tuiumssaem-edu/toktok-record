@@ -1574,9 +1574,9 @@ function openSettings(mode) {
   if (mode) UI.setMode = mode; else if ($('#modal').hidden) UI.setMode = 'cfg';
   const m = $('#modal'); m.hidden = false;
   const stRows = S.cfg.students.map((s) => '<div class="li"><input class="inp" data-sf="sname" data-id="' + esc(s.id) + '" value="' + esc(s.name) + '" maxlength="40"><span class="small mute">' + esc(s.alias) + '</span>' +
-    '<button class="mini" data-act="archStu" data-id="' + esc(s.id) + '">' + (s.archived ? '복원' : '보관') + '</button></div>').join('');
+    '<button class="mini" data-act="archStu" data-id="' + esc(s.id) + '">' + (s.archived ? '복원' : '보관') + '</button><button class="mini" data-act="delStu" data-id="' + esc(s.id) + '">삭제</button></div>').join('');
   const bRows = S.cfg.behaviors.map((b) => '<div class="li"><input class="inp" data-sf="bname" data-id="' + esc(b.id) + '" value="' + esc(b.name) + '" maxlength="60"><span class="small mute">' + esc(b.code) + '</span>' +
-    '<button class="mini" data-act="archBeh" data-id="' + esc(b.id) + '">' + (b.archived ? '복원' : '보관') + '</button></div>').join('');
+    '<button class="mini" data-act="archBeh" data-id="' + esc(b.id) + '">' + (b.archived ? '복원' : '보관') + '</button><button class="mini" data-act="delBeh" data-id="' + esc(b.id) + '">삭제</button></div>').join('');
   const conn = UI.setMode === 'conn';
   const rest =
     '<div><h4>관찰 대상 학생</h4>' + stRows + '<div class="li"><input class="inp" id="newStu" placeholder="학생 이름" maxlength="40"><button class="mini dk" data-act="addStu">추가</button></div><p class="small mute">‘보관’해도 지금까지의 기록은 그대로 남아 추이에 쓰입니다.</p></div>' +
@@ -1713,6 +1713,15 @@ const ACT = {
   addStu: () => { const i = $('#newStu'); const name = i.value.trim(); if (!name) return; const s = { id: 's' + uid(), name: name, alias: nextAlias() }; S.cfg.students.push(s); S.sid = s.id; touchCfg(); save(); openSettings(); },
   addBeh: () => { const i = $('#newBeh'); const name = i.value.trim(); if (!name) return; S.cfg.behaviors.push({ id: 'b' + uid(), name: name, code: nextCode() }); touchCfg(); save(); openSettings(); },
   archStu: (d) => { const s = stu(d.id); if (!s) return; if (!s.archived && activeStudents().length <= 1) { toast('학생이 한 명은 남아 있어야 합니다'); return; } s.archived = !s.archived; if (s.archived && S.sid === s.id) S.sid = activeStudents()[0].id; touchCfg(); save(); openSettings(); },
+  delStu: (d) => { const s = stu(d.id); if (!s) return;
+    if (!s.archived && activeStudents().length <= 1) { toast('학생이 한 명은 남아 있어야 합니다'); return; }
+    if (!confirm('‘' + s.name + '’을(를) 목록에서 완전히 지울까요?\n이 학생의 기존 기록은 지워지지 않고 파일·시트에 남지만, 앱 화면에서는 보이지 않게 됩니다.\n(잠시 빼 두기만 하려면 ‘보관’을 쓰세요)')) return;
+    S.cfg.students = S.cfg.students.filter((x) => x.id !== s.id);
+    if (S.sid === s.id) S.sid = activeStudents()[0].id; touchCfg(); save(); renderAll(); openSettings(); },
+  delBeh: (d) => { const b = beh(d.id); if (!b) return;
+    if (!b.archived && activeBehaviors().length <= 1) { toast('표적행동이 한 개는 남아 있어야 합니다'); return; }
+    if (!confirm('‘' + b.name + '’을(를) 목록에서 완전히 지울까요?\n이 행동의 기존 기록은 지워지지 않지만, 앱 화면에서는 보이지 않게 됩니다.\n(잠시 빼 두기만 하려면 ‘보관’을 쓰세요)')) return;
+    S.cfg.behaviors = S.cfg.behaviors.filter((x) => x.id !== b.id); touchCfg(); save(); renderAll(); openSettings(); },
   archBeh: (d) => { const b = beh(d.id); if (!b) return; b.archived = !b.archived; touchCfg(); save(); openSettings(); },
   exportCsv: () => exportCsv(),
   exportJson: () => exportJson(),
