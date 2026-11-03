@@ -1,0 +1,1757 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>톡톡! 행동기록장</title>
+<script id="toktok-config">
+  /* ▼ 배포하는 분만 수정: 템플릿 시트의 '사본 만들기' 링크를 따옴표 안에 넣으세요.
+     예) https://docs.google.com/spreadsheets/d/문서ID/copy
+     비워 두면 받는 분에게 '직접 설정하기(코드 붙여넣기)' 안내가 나옵니다. */
+  window.TOKTOK_TEMPLATE_URL = '';
+  /* AI 분석 서버 주소. 비워 두면 같은 사이트의 /api/analyze 를 씁니다. */
+  window.TOKTOK_AI_URL = '';
+</script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{
+  --bg:#e4eef8;--grid:rgba(255,255,255,.75);--panel:#ffffff;--line:#cddbea;--line-s:#2d4d70;
+  --navy:#2b5684;--navy-d:#1f3f63;--sky:#86b9e3;--sky-l:#edf4fb;--sky-m:#d6e7f6;
+  --ink:#1d2b3a;--mute:#5b6b7d;--faint:#8a98a8;
+  --sage:#e3efe8;--sage-i:#355e49;--sage-b:#b5d3c2;
+  --sand:#f5ecd5;--sand-i:#6c5320;--sand-b:#dfc890;
+  --rose:#f5e2e2;--rose-i:#833a3a;--rose-b:#ddb1b1;
+  --font:'Pretendard','Pretendard Variable',-apple-system,BlinkMacSystemFont,system-ui,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:var(--font);color:var(--ink);font-size:15px;line-height:1.55;letter-spacing:-.005em;padding-bottom:90px;
+  background-color:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:28px 28px;background-attachment:fixed}
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;-webkit-tap-highlight-color:transparent}
+button:disabled{opacity:.5;cursor:default}
+input,select{font:inherit;color:inherit}
+h1,h2,h3,h4,p{margin:0}
+h3{font-size:18px;font-weight:700;letter-spacing:-.01em}
+[hidden]{display:none!important}
+:focus-visible{outline:3px solid rgba(43,86,132,.45);outline-offset:2px;border-radius:8px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* 상단 */
+.top{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.96);border-bottom:1.5px solid var(--line)}
+.bar{max-width:1100px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.brand h1{font-size:17px;font-weight:700;color:#fff;background:var(--navy);border:1.5px solid var(--navy-d);border-radius:999px;padding:5px 16px;white-space:nowrap}
+.brand p{font-size:13px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tools{display:flex;align-items:center;gap:6px;flex:none}
+.pill{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;white-space:nowrap;color:var(--ink);min-height:36px}
+.sdot{width:8px;height:8px;border-radius:50%;background:var(--faint);flex:none}
+.pill.ok .sdot{background:#5f9c7f}.pill.warn .sdot{background:#c9a14a}.pill.err .sdot{background:#c26b6b}
+.pill.err{border-color:var(--rose-b);color:var(--rose-i)}
+.pill.on{background:var(--sky-m);border-color:var(--sky)}
+.chips{max-width:1100px;margin:0 auto;padding:2px 16px 10px;display:flex;gap:8px;overflow-x:auto}
+.chip-st{flex:none;display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-weight:600;font-size:14px;min-height:38px;color:var(--ink)}
+.chip-st.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.rec{width:7px;height:7px;border-radius:50%;background:#c26b6b}
+.chip-st.on .rec{background:#f2c7c7}
+
+/* 단계 표시 */
+.steps{border-top:1px solid var(--line);background:var(--sky-l)}
+.steps-in{position:relative;max-width:680px;margin:0 auto;padding:10px 16px;display:flex;gap:22px}
+.steps-in::before{content:'';position:absolute;left:24%;right:24%;top:50%;border-top:2px dashed #9bbbd8;z-index:0}
+.tab{position:relative;z-index:1;flex:1;display:flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:6px 10px;border-radius:12px;
+  background:#fff;border:1.5px solid var(--line);color:var(--mute);font-size:15px;font-weight:600;white-space:nowrap}
+.tab .num{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:var(--sky-l);color:var(--navy);border:1.5px solid #b7cfe6;flex:none}
+.tab.on{background:var(--navy);border-color:var(--navy-d);color:#fff}
+.tab.on .num{background:#fff;color:var(--navy);border-color:#fff}
+.tab small{position:absolute;top:-8px;right:-6px;font-size:11px;font-weight:700;background:var(--sand);color:var(--sand-i);border:1.5px solid var(--sand-b);border-radius:999px;padding:0 7px;line-height:18px}
+.demo{background:var(--sand);border-top:1px solid var(--sand-b);color:var(--sand-i);font-size:13px;text-align:center;padding:6px 10px}
+.demo button{text-decoration:underline;font-weight:700;margin-left:6px}
+
+main{max-width:1100px;margin:0 auto;padding:18px 16px}
+.card{background:var(--panel);border:1.5px solid var(--line);border-radius:14px;padding:16px}
+.rowb{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.mute{color:var(--mute)}
+.small{font-size:13px}
+.guide{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px;padding:12px 16px}
+.guide b{font-weight:700}
+.guide .note-hand{color:var(--mute);font-size:14px;margin-left:6px}
+.guide .dot{display:none}
+.lv{display:inline-block;font-weight:600;font-size:12px;border-radius:7px;padding:1px 8px;border:1px solid transparent;white-space:nowrap}
+.lv1{background:var(--sage);color:var(--sage-i);border-color:var(--sage-b)}
+.lv2{background:var(--sand);color:var(--sand-i);border-color:var(--sand-b)}
+.lv3{background:var(--rose);color:var(--rose-i);border-color:var(--rose-b)}
+.lvd{background:var(--sky-l);color:var(--navy);border-color:#b7cfe6;font-variant-numeric:tabular-nums}
+
+/* 1단계 */
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.bcard{display:flex;flex-direction:column;gap:12px}
+.bcard.run{border-color:var(--rose-b);box-shadow:0 0 0 3px rgba(221,177,177,.35)}
+.code{font-size:12px;font-weight:600;background:var(--sky-l);color:var(--navy);padding:1px 8px;border-radius:6px;border:1px solid #c9dcee}
+.bname{font-size:18px;font-weight:700;margin-top:5px;line-height:1.35}
+.cnt{font-size:14px;font-weight:700;background:var(--sky-l);color:var(--navy);border-radius:999px;padding:2px 11px;font-variant-numeric:tabular-nums}
+.mini3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;text-align:center;font-size:13px;font-weight:600}
+.mini3 span{padding:3px 0;border-radius:8px}
+.mini3 .m1{background:var(--sage);color:var(--sage-i)}
+.mini3 .m2{background:var(--sand);color:var(--sand-i)}
+.mini3 .m3{background:var(--rose);color:var(--rose-i)}
+.lab{font-size:13px;font-weight:600;color:var(--mute);margin-bottom:6px}
+.btn3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tap{min-height:56px;border-radius:12px;font-size:16px;font-weight:700;line-height:1.2;border:1.5px solid;transition:transform .06s}
+.tap:active{transform:scale(.97)}
+.tap small{display:block;font-size:12px;font-weight:600;opacity:.85}
+.tap1{background:var(--sage);color:var(--sage-i);border-color:var(--sage-b)}
+.tap2{background:var(--sand);color:var(--sand-i);border-color:var(--sand-b)}
+.tap3{background:var(--rose);color:var(--rose-i);border-color:var(--rose-b)}
+.sw{border-top:1px solid var(--line);padding-top:12px}
+.swrow{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.clock{font-size:20px;font-weight:700;color:var(--navy);font-variant-numeric:tabular-nums}
+.run .clock{color:var(--rose-i)}
+.dark-btn{width:100%;min-height:46px;border-radius:12px;background:#fff;border:1.5px solid var(--navy);color:var(--navy);font-size:15px;font-weight:700}
+.dark-btn:active{background:var(--sky-l)}
+.stop-btn{flex:1;min-height:46px;border-radius:12px;background:var(--rose);color:var(--rose-i);border:1.5px solid var(--rose-b);font-size:15px;font-weight:700}
+.x-btn{min-height:46px;padding:0 14px;border-radius:12px;background:#fff;border:1.5px solid var(--line);color:var(--mute);font-weight:600;font-size:14px}
+.tl{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.tli{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#f8fbfe;border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+.tli .l{display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap}
+.time{font-size:13px;color:var(--mute);font-variant-numeric:tabular-nums}
+.st{font-size:12px;font-weight:600;border-radius:999px;padding:1px 9px;white-space:nowrap;border:1px solid}
+.st.wait{background:var(--sand);color:var(--sand-i);border-color:var(--sand-b)}
+.st.part{background:var(--sky-l);color:var(--navy);border-color:#b7cfe6}
+.st.done{background:var(--sage);color:var(--sage-i);border-color:var(--sage-b)}
+.linkbtn{color:var(--navy);font-weight:700;font-size:14px;text-decoration:underline;text-underline-offset:3px}
+.linkbtn.red{color:var(--rose-i);text-decoration:none;font-weight:600}
+
+/* 2단계 */
+.stack{display:flex;flex-direction:column;gap:14px;min-width:0}
+.daynav{display:flex;align-items:center;gap:4px}
+.daynav button,.daynav input{min-height:38px;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:0 11px;font-size:14px;font-weight:600}
+.note{background:var(--sky-l);border:1px solid #c9dcee;border-left:4px solid var(--navy);border-radius:10px;padding:10px 14px;margin:14px 0;font-size:14px}
+.list{display:flex;flex-direction:column;gap:10px}
+.narrow{max-width:800px;margin:0 auto}
+.row{border:1.5px solid var(--line);border-left:4px solid var(--sand-b);background:#fff;border-radius:12px}
+.row.part{border-left-color:var(--sky)}
+.row.done{border-left-color:var(--sage-b)}
+.rh{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 14px;cursor:pointer;min-height:52px}
+.rh .l{display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-width:0}
+.rname{font-size:16px;font-weight:700}
+.sum{padding:8px 14px 12px;font-size:14px;color:#3d4c5c;border-top:1px solid var(--line)}
+.sum b{color:var(--navy);font-weight:700;margin-right:6px}
+.panel{padding:14px;border-top:1px solid var(--line);background:#fbfdff;border-radius:0 0 12px 12px;display:flex;flex-direction:column;gap:16px}
+.chipset{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.chip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:6px 13px;font-size:14px;font-weight:500;min-height:38px;color:var(--ink)}
+.chip.on{background:var(--navy);border-color:var(--navy);color:#fff;font-weight:600}
+.chip.cu{border-style:dashed}
+.inp{width:100%;min-height:44px;border:1.5px solid var(--line);border-radius:10px;padding:0 12px;background:#fff}
+.inp:focus{outline:3px solid rgba(43,86,132,.2);border-color:var(--navy)}
+.hint{font-size:13px;color:var(--navy);margin-top:6px}
+
+/* 3단계 */
+.seg{display:flex;gap:4px;background:var(--sky-l);border:1px solid #c9dcee;padding:3px;border-radius:12px}
+.seg button{flex:1;padding:7px 4px;border-radius:9px;font-size:14px;font-weight:600;color:var(--mute);min-height:38px}
+.seg button.on{background:var(--navy);color:#fff}
+.filters{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kpi{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:12px;text-align:left}
+.kpi .k{font-size:13px;color:var(--mute);font-weight:600}
+.kpi .v{font-size:24px;font-weight:700;margin-top:2px;color:var(--ink);font-variant-numeric:tabular-nums}
+.kpi .d{font-size:12px;color:var(--mute)}
+.chartbox{position:relative;height:190px;margin-bottom:10px}
+.chartbox.big{height:260px;margin-bottom:8px}
+.grid3{display:grid;gap:14px;grid-template-columns:1fr;margin-top:14px}
+@media(min-width:900px){.grid3{grid-template-columns:1fr 1fr;align-items:start}}
+.filt .filters{flex-direction:row;flex-wrap:wrap;margin:12px 0 0}
+.filt .seg{flex:2;min-width:260px}.filt select{flex:1;min-width:160px}
+.cseg{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.cseg button{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:6px 14px;font-size:14px;font-weight:600;min-height:38px;color:var(--mute)}
+.cseg button.on{background:var(--sky-m);border-color:var(--sky);color:var(--navy-d)}
+#chartNote{font-size:13px}
+.rep{background:#fff;border:1.5px solid var(--line-s);border-radius:14px;padding:18px}
+.rep .tag{font-size:13px;font-weight:600;color:var(--navy)}
+.rep .cp{background:var(--navy);color:#fff;font-weight:700;border-radius:10px;padding:9px 16px;min-height:42px;border:1.5px solid var(--navy-d)}
+.brief{margin-top:14px;border:1px solid #c9dcee;border-left:4px solid var(--navy);border-radius:10px;padding:12px 16px;background:var(--sky-l)}
+.brief .bh{font-size:15px;font-weight:700;margin-bottom:4px}
+.brief ul{margin:0;padding-left:18px}
+.brief li{font-size:15px;margin:4px 0}
+.rs{background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:0 14px;margin-top:8px}
+.rs summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:48px;font-size:15px;font-weight:700;color:var(--ink)}
+.rs summary::-webkit-details-marker{display:none}
+.rs summary::after{content:'';width:8px;height:8px;border-right:2px solid var(--navy);border-bottom:2px solid var(--navy);transform:rotate(45deg) translateY(-3px);transition:transform .15s}
+.rs[open] summary::after{transform:rotate(225deg) translateY(-1px)}
+.rs[open]{padding-bottom:12px}
+.rs ul{margin:0;padding:10px 0 0 18px;font-size:14px;border-top:1px solid var(--line)}
+.rs li{margin:5px 0}
+.rs.crisis{border-color:var(--rose-b);background:#fdf8f8}.rs.crisis summary{color:var(--rose-i)}
+.foot{font-size:12px;color:var(--mute);margin-top:12px}
+
+/* 토스트·모달 */
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:60;background:var(--navy-d);color:#fff;border-radius:12px;padding:11px 16px;font-size:14px;font-weight:600;display:flex;gap:14px;align-items:center;box-shadow:0 8px 22px rgba(31,63,99,.28);max-width:92vw}
+#toast button{color:#cfe3f6;font-weight:700;text-decoration:underline;white-space:nowrap;flex:none}
+#modal{position:fixed;inset:0;z-index:50;background:rgba(29,43,58,.4);display:flex;align-items:center;justify-content:center;padding:14px}
+.mbox{background:#fff;border:1.5px solid var(--line-s);border-radius:16px;width:100%;max-width:560px;max-height:92vh;display:flex;flex-direction:column;padding:18px;gap:12px}
+.mbody{overflow-y:auto;display:flex;flex-direction:column;gap:20px;font-size:14px}
+.mbody h4{font-size:15px;font-weight:700;margin-bottom:8px}
+.li{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.li .inp{flex:1}
+.mini{min-height:40px;padding:0 13px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font-weight:600;font-size:13px;white-space:nowrap}
+.mini.dk{background:var(--navy);color:#fff;border-color:var(--navy-d)}
+.icon{min-height:36px;padding:0 13px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:600}
+.empty{text-align:center;color:var(--mute);padding:28px 8px;font-size:14px}
+
+/* 서버 연결 */
+.connbox{border:1.5px solid var(--line-s);border-radius:12px;padding:14px;background:#fbfdff}
+.connbox .sdot{display:inline-block;vertical-align:middle;margin-right:4px}
+.okdot{background:#5f9c7f!important}.warndot{background:#c9a14a!important}
+.flab{display:block;font-size:13px;font-weight:600;margin:12px 0 4px}
+.connbtns{display:flex;gap:6px;margin-top:10px}
+#rMsg{margin-top:8px}#rMsg.err{color:var(--rose-i)}#rMsg.ok{color:var(--sage-i)}
+.guidebox{margin-top:12px;border:1px solid #c9dcee;border-radius:10px;padding:0 12px;background:var(--sky-l)}
+.guidebox summary{min-height:44px;display:flex;align-items:center;font-weight:700;cursor:pointer;color:var(--navy-d)}
+.glist{margin:4px 0 10px;padding-left:20px;font-size:14px}
+.glist li{margin:8px 0}
+.codehead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:10px 0 6px}
+a.linkbtn-a{display:inline-flex;align-items:center;margin:6px 0;text-decoration:none}
+.subguide{margin:6px 0 10px;border-top:1px solid #c9dcee;padding-top:4px}
+.subguide summary{min-height:40px;font-size:14px}
+.codearea{width:100%;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;border:1px solid var(--line);border-radius:8px;padding:8px;background:#fff;color:var(--ink);resize:vertical;margin-bottom:12px}
+
+/* PDF·인쇄용 */
+#pdfArea{position:fixed;left:-10000px;top:0;width:720px}
+.pdf-doc{width:auto;background:#fff;color:#1d2b3a;font-family:var(--font);font-size:12.5px;line-height:1.6;padding:0}
+.pdf-doc .pdf-head{border-bottom:2px solid var(--navy);padding-bottom:8px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:flex-end}
+.pdf-doc .pdf-app{font-size:11px;color:var(--navy);font-weight:600}
+.pdf-doc h1{font-size:22px;font-weight:700;color:var(--navy-d)}
+.pdf-doc table{width:100%;border-collapse:collapse;margin-bottom:12px}
+.pdf-doc th,.pdf-doc td{border:1px solid #cddbea;padding:5px 8px;text-align:left;font-size:12px}
+.pdf-doc th{background:#edf4fb;color:var(--navy-d);width:72px;font-weight:600}
+.pdf-doc .kpis{grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.pdf-doc .kpi{padding:8px;border-width:1px}
+.pdf-doc .kpi .v{font-size:18px}
+.pdf-doc .pdf-chart{border:1px solid #cddbea;border-radius:8px;padding:8px 10px;margin-bottom:12px}
+.pdf-doc .pdf-chart img{width:100%;display:block}
+.pdf-doc .pdf-cap{font-size:11.5px;color:var(--mute);font-weight:600;margin-bottom:4px}
+.pdf-doc .pdf-sec{margin-bottom:10px}
+.pdf-doc h2{font-size:14px;font-weight:700;color:var(--navy-d);border-left:3px solid var(--navy);padding-left:8px;margin:0 0 4px}
+.pdf-doc .pdf-sec.crisis h2{color:var(--rose-i);border-left-color:var(--rose-i)}
+.pdf-doc ul{margin:0;padding-left:18px}
+.pdf-doc li{margin:2px 0}
+.pdf-doc .pdf-brief{background:#edf4fb;border-radius:8px;padding:8px 12px}
+.pdf-doc .pdf-foot{margin-top:14px;padding-top:8px;border-top:1px solid #cddbea;font-size:10.5px;color:var(--mute)}
+/* 표지 */
+body.covered>header,body.covered>main{visibility:hidden}
+body.covered{overflow:hidden}
+.cover{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:24px 16px;overflow-y:auto;
+  background-color:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:28px 28px}
+.cover-card{width:100%;max-width:460px;background:#fff;border:1.5px solid var(--line);border-radius:18px;padding:30px 26px 24px;box-shadow:0 6px 24px rgba(31,63,99,.08)}
+.cover-tag{display:inline-block;font-size:12.5px;font-weight:600;color:var(--navy);background:var(--sky-l);border:1px solid var(--sky-m);border-radius:999px;padding:3px 11px}
+.cover-title{margin-top:14px;font-size:30px;font-weight:800;letter-spacing:-.025em;color:var(--navy-d);line-height:1.25}
+.cover-sub{margin-top:6px;color:var(--mute);font-size:15px}
+.cover-list{list-style:none;margin:22px 0 0;padding:0;border-top:1px solid var(--line)}
+.cover-list li{display:flex;gap:12px;align-items:baseline;padding:11px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+.cover-list .num{flex:none;width:22px;height:22px;border-radius:50%;background:var(--sky-m);color:var(--navy-d);font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;transform:translateY(-1px)}
+.cover-list b{font-weight:700;margin-right:6px}
+.cover-list span.d{color:var(--mute)}
+.cover-opt{margin-top:18px;display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:var(--sky-l);border:1px solid var(--sky-m);border-radius:12px;cursor:pointer;font-size:14px}
+.cover-opt input{width:18px;height:18px;margin:2px 0 0;accent-color:var(--navy);flex:none}
+.cover-opt small{display:block;color:var(--mute);font-size:12.5px;margin-top:2px}
+.cover-go{margin-top:16px;width:100%;min-height:50px;border-radius:12px;background:var(--navy);color:#fff;font-size:16px;font-weight:700;border:1.5px solid var(--navy-d)}
+.cover-go:hover{background:var(--navy-d)}
+.cover-meta{margin-top:12px;text-align:center;font-size:12.5px;color:var(--faint)}
+.brand h1 button{all:inherit;cursor:pointer;padding:0;border:0;background:none}
+@media print{
+  body.printing{background:#fff}
+  body.printing>*:not(#pdfArea){display:none!important}
+  body.printing #pdfArea{position:static;left:auto;width:auto}
+  body.printing .pdf-doc{width:auto}
+  @page{size:A4;margin:14mm 12mm}
+}
+@media(max-width:640px){
+  #syncBtn .ptxt{display:none}#syncBtn{width:36px;padding:0;justify-content:center}
+  .brand p{display:none}.brand h1{font-size:15px;padding:4px 13px}.bar{padding:8px 12px}
+  .steps-in{gap:10px;padding:8px 12px}.tab{font-size:14px;gap:6px;padding:6px 6px}.tab .num{width:20px;height:20px;font-size:11px}
+  .stealth-txt{display:none}
+}
+.aibox{margin-top:14px;padding:14px;border:1px solid #cfe0f0;border-radius:12px;background:#f4f9ff}.aibox .aih{margin-bottom:6px}.aitext{font-size:14px;line-height:1.75;margin:8px 0}.aibox .err{color:#b4443f}
+</style>
+</head>
+<body class="covered">
+
+<div id="cover" class="cover" role="dialog" aria-modal="true" aria-labelledby="coverTitle">
+  <div class="cover-card">
+    <span class="cover-tag">학급 행동 관찰 도구</span>
+    <h2 id="coverTitle" class="cover-title">톡톡! 행동기록장</h2>
+    <p class="cover-sub">수업 중 3초 기록, 쉬는 시간 1분 정리</p>
+    <ol class="cover-list">
+      <li><span class="num">1</span><div><b>빠른 기록</b><span class="d">버튼 한 번으로 빈도·강도·지속시간</span></div></li>
+      <li><span class="num">2</span><div><b>상황 기록</b><span class="d">직전 상황, 그 뒤 반응, 행동의 이유</span></div></li>
+      <li><span class="num">3</span><div><b>행동 리포트</b><span class="d">추이 그래프와 요약, PDF 저장</span></div></li>
+    </ol>
+    <label class="cover-opt"><input type="checkbox" id="coverStealth"><span>학생 이름 가리고 시작<small>화면에 이름 대신 '학생 A'처럼 별칭이 보입니다</small></span></label>
+    <button class="cover-go" data-act="enter">시작하기</button>
+    <p id="coverMeta" class="cover-meta"></p>
+  </div>
+</div>
+
+<header class="top">
+  <div class="bar">
+    <div class="brand">
+      <h1><button data-act="showCover" title="표지로 돌아가기">톡톡! 행동기록장</button></h1>
+      <p>수업 중 3초 기록, 쉬는 시간 1분 정리</p>
+    </div>
+    <div class="tools">
+      <button id="syncBtn" class="pill" data-act="syncNow"></button>
+      <button id="stealthBtn" class="pill" data-act="stealth"></button>
+      <button class="icon" data-act="openSettings">설정</button>
+    </div>
+  </div>
+  <div id="chips" class="chips"></div>
+  <nav class="steps" aria-label="단계"><div class="steps-in">
+    <button id="tab1" class="tab on" data-act="step" data-v="1"><span class="num">1</span>빠른 기록</button>
+    <button id="tab2" class="tab" data-act="step" data-v="2"><span class="num">2</span>상황 기록<small id="tabBadge" hidden></small></button>
+    <button id="tab3" class="tab" data-act="step" data-v="3"><span class="num">3</span>행동 리포트</button>
+  </div></nav>
+  <div id="demoBar" class="demo" hidden>샘플 데이터가 섞여 있습니다 (서버로 보내지 않음) <button data-act="clearDemo">샘플 지우기</button></div>
+</header>
+
+<main>
+  <!-- 1단계 -->
+  <section id="s1">
+    <div class="card guide">
+      <div><span class="dot"></span><b>수업 중 원터치 기록</b> <span class="note-hand">누르는 순간 시각과 행동이 바로 적혀요</span></div>
+      <div><span class="lv lv1">1 약</span> <span class="lv lv2">2 중</span> <span class="lv lv3">3 강</span> <span class="lv lvd">지속시간</span></div>
+    </div>
+    <div id="bgrid" class="grid"></div>
+    <div class="card" style="margin-top:12px">
+      <div class="rowb"><h3>오늘 기록</h3><button class="linkbtn" data-act="step" data-v="2">상황 기록으로 이동</button></div>
+      <div id="mini" class="tl"></div>
+    </div>
+  </section>
+
+  <!-- 2단계: 상황 채우기 -->
+  <section id="s2" hidden>
+    <div class="card narrow">
+      <div class="rowb">
+        <h3>기록 목록 <span id="dayCount" class="cnt"></span></h3>
+        <div class="daynav">
+          <button data-act="dayPrev" aria-label="이전 날">◀</button>
+          <input type="date" id="dayPick" data-field="day">
+          <button data-act="dayNext" aria-label="다음 날">▶</button>
+          <button data-act="dayToday">오늘</button>
+        </div>
+      </div>
+      <div id="pending"></div>
+      <div id="list" class="list"></div>
+    </div>
+  </section>
+
+  <!-- 3단계: 추이·리포트 -->
+  <section id="s3" hidden>
+    <div class="card filt">
+      <h3>행동 리포트 <span id="dashWho" class="mute small"></span></h3>
+      <div class="filters">
+        <div class="seg" id="periodSeg"></div>
+        <select id="bsel" class="inp" data-field="bfilter" aria-label="행동 선택"></select>
+      </div>
+    </div>
+    <div class="grid3">
+      <div class="stack">
+        <div id="kpis" class="kpis" style="margin:0"></div>
+        <div class="card">
+          <div id="chartSeg" class="cseg"></div>
+          <div id="chartWrap" class="chartbox big"><canvas id="cMain"></canvas></div>
+          <p id="chartNote" class="small mute"></p>
+          <p id="noChart" class="small mute" hidden>차트 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인해 주세요. (위 숫자 요약과 리포트는 정상입니다)</p>
+        </div>
+      </div>
+      <div class="rep">
+        <div class="rowb">
+          <div><div class="tag">규칙 기반 분석</div><h3>리포트</h3></div>
+          <button class="cp" data-act="savePdf" id="pdfBtn">PDF로 저장</button>
+        </div>
+        <div id="report"></div>
+        <p class="foot">항목 제목을 누르면 펼쳐집니다. PDF에는 모든 항목이 펼쳐진 상태로 담깁니다. 외부로 전송되는 데이터는 없습니다.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="toast" hidden></div>
+<div id="modal" hidden></div>
+
+<script type="text/plain" id="serverCodeSrc">
+/**
+ * 톡톡! 행동기록장 — Google Apps Script 서버 (외부 API를 사용하지 않습니다)
+ *
+ * 저장 방식
+ *  - '기록' 시트 : 관찰 기록이 한 줄씩 계속 쌓입니다. (날짜가 달라져도 지워지지 않습니다)
+ *  - '설정' 시트 : 학생·표적행동 목록(JSON)
+ *  - 화면(Index.html)은 먼저 기기에 저장한 뒤 이 서버로 동기화합니다.
+ *
+ * 받는 분의 사용 순서 (주소 연결, 약 3분)
+ *   1) 새 구글 시트 → 확장 프로그램 → Apps Script → Code.gs의 내용을 모두 지우고 이 코드를 붙여넣은 뒤 저장
+ *   2) 배포 → 새 배포 → 유형: 웹 앱, 실행 사용자 = 나, 액세스 권한 = '모든 사용자' → 배포 → 권한 허용
+ *   3) 웹 앱 주소(…/exec)를 화면의 [설정 → 서버 연결]에 붙여넣고, 앞으로 쓸 비밀번호(8자 이상)를 정해 연결합니다.
+ *      처음 연결할 때 넣은 비밀번호가 이 시트의 비밀번호로 등록됩니다. 다른 기기에서도 같은 주소와 비밀번호를 넣습니다.
+ *   비밀번호를 잊었다면 시트 메뉴 [톡톡 행동기록장 → 비밀번호 초기화] 후 다시 연결하세요. (기록은 지워지지 않습니다)
+ *
+ * 다른 방법 (입력 없이 자동 연결): 화면 파일을 HTML 파일 'Index'로 함께 넣고 액세스 권한 '나만'으로 배포한 뒤 그 주소로 엽니다.
+ * 코드를 고친 뒤에는 배포 → 배포 관리 → 연필 → 버전 '새 버전'으로 다시 배포해야 반영됩니다.
+ */
+
+const LOG_SHEET = '기록';
+const CFG_SHEET = '설정';
+const MAX_BATCH = 300;
+
+const LOG_HEADERS = ['id', '날짜', '시각', '학생ID', '학생', '행동ID', '행동코드', '행동',
+  '유형', '강도(1약~3강)', '지속(초)', '직전 상황(A)', '그 뒤 반응(C)', '행동의 이유(추정)', '삭제', '수정시각', '서버시각'];
+const COL = { id: 0, d: 1, t: 2, sid: 3, sn: 4, bid: 5, bc: 6, bn: 7, type: 8, lv: 9, sec: 10, a: 11, c: 12, fn: 13, del: 14, u: 15, srv: 16 };
+
+const FN_LABEL = {
+  escape: '과제·활동 회피',
+  attention: '관심 획득',
+  tangible: '사물·활동 획득',
+  sensory: '감각 자극 조절',
+  other: '기타·추가 관찰'
+};
+
+/** 웹 앱 진입점 (방법 2: Index 파일이 있으면 화면을 보여 줍니다) */
+function doGet() {
+  try {
+    return HtmlService.createHtmlOutputFromFile('Index')
+      .setTitle('톡톡! 행동기록장')
+      .addMetaTag('viewport', 'width=device-width, initial-scale=1')
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  } catch (e) {
+    return HtmlService.createHtmlOutput(
+      '<meta name="viewport" content="width=device-width, initial-scale=1">' +
+      '<div style="font-family:sans-serif;max-width:520px;margin:40px auto;padding:0 16px;line-height:1.6">' +
+      '<h2>톡톡! 행동기록장 서버</h2><p>서버가 준비되었습니다. 이 페이지의 주소를 복사해 ' +
+      '톡톡! 행동기록장 화면의 <b>설정 → 서버 연결</b>에 붙여넣고, 앞으로 쓸 비밀번호를 정해 연결하세요.</p></div>'
+    ).setTitle('톡톡! 행동기록장 서버');
+  }
+}
+
+/** 주소로 연결한 화면이 보내는 요청을 처리합니다. 비밀번호가 맞을 때만 응답합니다.
+ *  아직 비밀번호가 없으면, 처음 연결한 화면이 보낸 비밀번호(8자 이상)를 등록합니다. */
+function doPost(e) {
+  let res;
+  try {
+    const body = JSON.parse((e && e.postData && e.postData.contents) || '{}');
+    const given = String(body.key || '');
+    const props = PropertiesService.getScriptProperties();
+    let saved = props.getProperty('APP_KEY_HASH');
+    let claimed = false;
+    if (!saved) {
+      if (given.length < 8) {
+        res = { ok: false, code: 'SHORT', error: '처음 연결입니다. 앞으로 쓸 비밀번호를 8자 이상으로 정해 주세요.' };
+      } else {
+        const lock = LockService.getScriptLock();
+        lock.waitLock(10000);
+        try {
+          saved = props.getProperty('APP_KEY_HASH');
+          if (!saved) { saved = hash_(given); props.setProperty('APP_KEY_HASH', saved); claimed = true; }
+        } finally { lock.releaseLock(); }
+      }
+    }
+    if (!res) {
+      if (hash_(given) !== saved) {
+        Utilities.sleep(800);
+        res = { ok: false, code: 'BAD_KEY', error: '비밀번호가 맞지 않습니다. 잊으셨다면 시트 메뉴 [톡톡 행동기록장 → 비밀번호 초기화] 후 다시 연결하세요.' };
+      } else if (body.action === 'ping') {
+        res = { ok: true, claimed: claimed, total: Math.max(0, logSheet_().getLastRow() - 1), hasConfig: !!readCfg_() };
+      } else if (body.action === 'sync') {
+        res = sync(body.payload);
+      } else {
+        res = { ok: false, error: '알 수 없는 요청입니다.' };
+      }
+    }
+  } catch (err) {
+    res = { ok: false, error: String(err && err.message ? err.message : err) };
+  }
+  return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);
+}
+
+function hash_(s) {
+  return Utilities.base64Encode(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, 'toktok:' + s, Utilities.Charset.UTF_8));
+}
+
+/* ───────── 시트 메뉴 ───────── */
+
+/** 시트를 열면 위쪽에 '톡톡 행동기록장' 메뉴가 생깁니다. */
+function onOpen() {
+  SpreadsheetApp.getUi().createMenu('톡톡 행동기록장')
+    .addItem('연결 방법 보기', 'showGuide')
+    .addItem('비밀번호 초기화', 'resetPassword')
+    .addToUi();
+}
+
+function showGuide() {
+  const html = HtmlService.createHtmlOutput(
+    '<div style="font-family:sans-serif;font-size:14px;line-height:1.6;color:#1d2b3a">' +
+    '<ol style="padding-left:18px;margin:0">' +
+    '<li style="margin-bottom:10px"><b>웹 앱으로 배포</b><br>확장 프로그램 → Apps Script → 오른쪽 위 <b>배포 → 새 배포</b> → 톱니바퀴에서 <b>웹 앱</b> 선택 → 실행 사용자 <b>나</b>, 액세스 권한 <b>모든 사용자</b> → 배포</li>' +
+    '<li style="margin-bottom:10px"><b>권한 허용</b><br>‘액세스 승인’을 눌러 내 계정을 고릅니다. ‘확인되지 않은 앱’이 보이면 <b>고급 → 이동 → 허용</b>을 누릅니다.</li>' +
+    '<li style="margin-bottom:10px"><b>주소 복사</b><br>마지막 화면의 웹 앱 주소(…/exec)를 복사합니다.</li>' +
+    '<li><b>앱에서 연결</b><br>톡톡! 행동기록장의 <b>설정 → 서버 연결</b>에 주소를 붙여넣고, 앞으로 쓸 비밀번호(8자 이상)를 정해 <b>연결하기</b>를 누릅니다.</li>' +
+    '</ol><p style="color:#5b6b7d;font-size:12px">비밀번호는 다른 사람에게 알리지 마세요. 잊었다면 이 메뉴의 ‘비밀번호 초기화’ 후 다시 연결하면 됩니다.</p></div>'
+  ).setWidth(440).setHeight(420);
+  SpreadsheetApp.getUi().showModalDialog(html, '톡톡! 행동기록장 연결 방법');
+}
+
+/** 비밀번호를 지웁니다. 기록은 그대로이며, 다음에 연결하는 화면이 새 비밀번호를 등록합니다. */
+function resetPassword() {
+  let ui = null;
+  try { ui = SpreadsheetApp.getUi(); } catch (e) { ui = null; }
+  if (ui) {
+    const ok = ui.alert('비밀번호 초기화', '비밀번호를 지웁니다. 기록은 그대로 남습니다.\n이후 처음 연결하는 화면에서 새 비밀번호를 정하게 됩니다. 계속할까요?', ui.ButtonSet.YES_NO);
+    if (ok !== ui.Button.YES) return;
+  }
+  PropertiesService.getScriptProperties().deleteProperty('APP_KEY_HASH');
+  PropertiesService.getScriptProperties().deleteProperty('APP_KEY');
+  if (ui) ui.alert('초기화했습니다. 앱의 설정 → 서버 연결에서 새 비밀번호로 다시 연결하세요. 다른 기기도 새 비밀번호로 다시 연결해야 합니다.');
+  console.log('비밀번호를 초기화했습니다.');
+}
+
+/* ───────── 저장소(스프레드시트) ───────── */
+
+function ss_() {
+  const active = SpreadsheetApp.getActiveSpreadsheet();
+  if (active) return active;
+  const props = PropertiesService.getScriptProperties();
+  const id = props.getProperty('SHEET_ID');
+  if (id) {
+    try { return SpreadsheetApp.openById(id); } catch (e) { /* 새로 만든다 */ }
+  }
+  const created = SpreadsheetApp.create('톡톡 행동기록장 데이터');
+  props.setProperty('SHEET_ID', created.getId());
+  return created;
+}
+
+function sheet_(name, headers) {
+  const book = ss_();
+  let sh = book.getSheetByName(name);
+  if (!sh) sh = book.insertSheet(name);
+  if (sh.getLastRow() === 0) {
+    sh.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight('bold');
+    sh.setFrozenRows(1);
+  }
+  // 모든 칸을 '일반 텍스트'로 고정 → 값이 수식·날짜로 해석되지 않습니다.
+  sh.getRange(1, 1, sh.getMaxRows(), headers.length).setNumberFormat('@');
+  return sh;
+}
+
+function logSheet_() { return sheet_(LOG_SHEET, LOG_HEADERS); }
+function cfgSheet_() { return sheet_(CFG_SHEET, ['설정(JSON)', '수정시각']); }
+
+/* ───────── 입력 정리 ───────── */
+
+function str_(v, n) { return String(v == null ? '' : v).slice(0, n); }
+
+function fnToLabel_(key) { return FN_LABEL[key] || ''; }
+function fnFromLabel_(label) {
+  for (const k in FN_LABEL) { if (FN_LABEL[k] === label) return k; }
+  return '';
+}
+
+/** 클라이언트가 보낸 기록 1건을 검증·정리합니다. 올바르지 않으면 null */
+function cleanLog_(r) {
+  if (!r || typeof r !== 'object') return null;
+  const id = str_(r.id, 64).replace(/[^\w\-]/g, '');
+  if (!id) return null;
+  const d = str_(r.d, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return null;
+  const type = r.type === 'dur' ? 'dur' : 'freq';
+  let lv = Math.round(Number(r.lv) || 0);
+  lv = type === 'freq' ? Math.min(3, Math.max(1, lv)) : 0;
+  const sec = type === 'dur' ? Math.max(0, Math.min(86400, Math.round(Number(r.sec) || 0))) : 0;
+  const fn = FN_LABEL[r.fn] ? r.fn : '';
+  return {
+    id: id, d: d, t: str_(r.t, 8),
+    sid: str_(r.sid, 64), sn: str_(r.sn, 60),
+    bid: str_(r.bid, 64), bc: str_(r.bc, 16), bn: str_(r.bn, 80),
+    type: type, lv: lv, sec: sec,
+    a: str_(r.a, 200), c: str_(r.c, 200), fn: fn,
+    del: r.del ? 1 : 0,
+    u: Math.round(Number(r.u) || 0)
+  };
+}
+
+function toRow_(rec, serverAt) {
+  return [
+    rec.id, rec.d, rec.t, rec.sid, rec.sn, rec.bid, rec.bc, rec.bn,
+    rec.type === 'dur' ? '지속시간' : '빈도',
+    String(rec.lv), String(rec.sec), rec.a, rec.c, fnToLabel_(rec.fn),
+    rec.del ? '1' : '', String(rec.u), String(serverAt)
+  ];
+}
+
+function fromRow_(row) {
+  const out = {
+    id: String(row[COL.id]), d: String(row[COL.d]), t: String(row[COL.t]),
+    sid: String(row[COL.sid]), sn: String(row[COL.sn]),
+    bid: String(row[COL.bid]), bc: String(row[COL.bc]), bn: String(row[COL.bn]),
+    type: String(row[COL.type]) === '지속시간' ? 'dur' : 'freq',
+    lv: Number(row[COL.lv]) || 0, sec: Number(row[COL.sec]) || 0,
+    a: String(row[COL.a]), c: String(row[COL.c]), fn: fnFromLabel_(String(row[COL.fn])),
+    u: Number(row[COL.u]) || 0
+  };
+  if (String(row[COL.del]) === '1') out.del = true;
+  return out;
+}
+
+function cleanConfig_(cfg) {
+  if (!cfg || typeof cfg !== 'object') return null;
+  const list = function (arr, pick) {
+    return (Array.isArray(arr) ? arr : []).slice(0, 100).map(pick).filter(function (x) { return x && x.id; });
+  };
+  return {
+    students: list(cfg.students, function (s) {
+      return s && { id: str_(s.id, 64), name: str_(s.name, 40), alias: str_(s.alias, 20), archived: s.archived ? true : false };
+    }),
+    behaviors: list(cfg.behaviors, function (b) {
+      return b && { id: str_(b.id, 64), name: str_(b.name, 60), code: str_(b.code, 12), archived: b.archived ? true : false };
+    }),
+    u: Math.round(Number(cfg.u) || 0)
+  };
+}
+
+function readCfg_() {
+  const sh = cfgSheet_();
+  const raw = sh.getRange(2, 1).getValue();
+  if (!raw) return null;
+  try { return cleanConfig_(JSON.parse(String(raw))); } catch (e) { return null; }
+}
+
+function writeCfg_(cfg) {
+  const sh = cfgSheet_();
+  sh.getRange(2, 1, 1, 2).setValues([[JSON.stringify(cfg), String(cfg.u)]]);
+}
+
+/* ───────── 동기화 (화면이 호출하는 유일한 함수) ─────────
+ * payload = { since: 마지막으로 받은 서버시각, logs: [변경된 기록들], config: 설정(바뀐 경우만) }
+ * 반환   = { ok, serverAt, logs: [since 이후 바뀐 기록], config, total, url }
+ */
+function sync(payload) {
+  try {
+    payload = payload || {};
+    const since = Number(payload.since) || 0;
+    const incoming = Array.isArray(payload.logs) ? payload.logs.slice(0, MAX_BATCH) : [];
+    const newCfg = cleanConfig_(payload.config);
+
+    const lock = LockService.getScriptLock();
+    lock.waitLock(20000);
+    try {
+      const sh = logSheet_();
+      const serverAt = Date.now();
+      const width = LOG_HEADERS.length;
+      const last = sh.getLastRow();
+      const values = last > 1 ? sh.getRange(2, 1, last - 1, width).getValues() : [];
+      const index = {};
+      values.forEach(function (r, i) { index[String(r[COL.id])] = i; });
+
+      const existingCount = values.length;
+      let rewrite = false;
+
+      incoming.forEach(function (raw) {
+        const rec = cleanLog_(raw);
+        if (!rec) return;
+        const row = toRow_(rec, serverAt);
+        if (Object.prototype.hasOwnProperty.call(index, rec.id)) {
+          const i = index[rec.id];
+          const oldU = Number(values[i][COL.u]) || 0;
+          if (rec.u >= oldU) { values[i] = row; rewrite = true; }   // 더 최근 수정본만 반영
+        } else {
+          index[rec.id] = values.length;
+          values.push(row);
+        }
+      });
+
+      if (rewrite) {
+        sh.getRange(2, 1, values.length, width).setValues(values);
+      } else if (values.length > existingCount) {
+        sh.getRange(existingCount + 2, 1, values.length - existingCount, width)
+          .setValues(values.slice(existingCount));
+      }
+
+      let cfg = readCfg_();
+      if (newCfg && (!cfg || newCfg.u > cfg.u)) {
+        writeCfg_(newCfg);
+        cfg = newCfg;
+      }
+
+      const changed = [];
+      values.forEach(function (r) {
+        if ((Number(r[COL.srv]) || 0) > since) changed.push(fromRow_(r));
+      });
+
+      return {
+        ok: true,
+        serverAt: serverAt,
+        logs: changed,
+        config: cfg,
+        total: values.length,
+        url: ss_().getUrl()
+      };
+    } finally {
+      lock.releaseLock();
+    }
+  } catch (e) {
+    return { ok: false, error: String(e && e.message ? e.message : e) };
+  }
+}
+
+/* ───────── 점검·정리용 (Apps Script 편집기에서 직접 실행) ───────── */
+
+/** 편집기에서 실행 → 로그에 현재 상태가 출력됩니다. 처음 한 번 실행하면 권한 승인 창이 뜹니다. */
+function diagnose() {
+  const book = ss_();
+  const sh = logSheet_();
+  const cfg = readCfg_();
+  const info = {
+    spreadsheet: book.getUrl(),
+    기록행수: Math.max(0, sh.getLastRow() - 1),
+    학생수: cfg ? cfg.students.length : '(설정 없음 - 처음 동기화 때 생성)',
+    비밀번호: PropertiesService.getScriptProperties().getProperty('APP_KEY_HASH') ? '등록됨' : '아직 없음 (처음 연결하는 화면에서 등록)'
+  };
+  console.log(JSON.stringify(info, null, 2));
+  return info;
+}
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+<script>
+(function () {
+'use strict';
+
+/* ───────── 도구 ───────── */
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const pad = (n) => String(n).padStart(2, '0');
+const ymd = (d) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const hms = (d) => pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+const today = () => ymd(new Date());
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const clone = (o) => JSON.parse(JSON.stringify(o));
+function addDays(ds, n) { const p = ds.split('-').map(Number); return ymd(new Date(p[0], p[1] - 1 + 0, p[2] + n)); }
+const WD = ['일', '월', '화', '수', '목', '금', '토'];
+function dayLabel(ds) { const p = ds.split('-').map(Number); return p[1] + '/' + p[2] + '(' + WD[new Date(p[0], p[1] - 1, p[2]).getDay()] + ')'; }
+function fmtSec(s) { s = Math.round(s); const m = Math.floor(s / 60), r = s % 60; return m ? m + '분 ' + r + '초' : r + '초'; }
+function daysList(from, to) { const out = []; let d = from, g = 0; while (d <= to && g++ < 400) { out.push(d); d = addDays(d, 1); } return out; }
+const sum = (a, f) => a.reduce((t, x) => t + (f ? f(x) : x), 0);
+
+/* ───────── 상수 ───────── */
+const KEY = 'hgb_v3';
+const FN = { escape: '과제·활동 회피', attention: '관심 획득', tangible: '사물·활동 획득', sensory: '감각 자극 조절', other: '기타·추가 관찰' };
+const FN_KEYS = Object.keys(FN);
+const PRESET_A = ['개별 과제 제시', '교사 구두 지시', '모둠 협동 활동', '또래와의 갈등', '쉬는 시간/이동', '소음/과민 자극'];
+const PRESET_C = ['구두 주의/경고', '진정 공간(타임아웃) 이동', '과제 난이도 조절/경감', '계획된 무시', '대체행동 강화/칭찬'];
+const LVL = { 1: '약', 2: '중', 3: '강' };
+const COLORS = { 1: '#8fbfa6', 2: '#dcbd76', 3: '#d49a9a' };
+
+/* 단서어: 교사가 기능을 고르지 않았을 때만 '참고용'으로 추정에 씁니다 */
+const CLUES = {
+  escape: { a: ['과제', '지시', '난이도', '어려', '협동', '전환', '시험', '쓰기', '읽기'], c: ['타임아웃', '진정 공간', '경감', '면제', '중단', '쉬게', '쉬는', '줄여', '자리 이동'] },
+  attention: { a: ['혼자', '관심 없', '다른 학생', '교사 바쁨', '또래 대화', '대기'], c: ['주의', '경고', '꾸중', '훈계', '관심', '반응', '쳐다', '웃', '달래'] },
+  tangible: { a: ['거절', '제한', '금지', '빼앗', '차례', '기다', '종료 안내', '간식', '장난감', '게임'], c: ['제공', '허용', '받았', '얻', '주었', '선호'] },
+  sensory: { a: ['소음', '과민', '자극', '밝', '시끄', '냄새', '촉감', '혼잡', '더워', '추워'], c: [] }
+};
+
+const DEFAULT_CFG = {
+  students: [
+    { id: 's1', name: '김민준', alias: '학생 A' },
+    { id: 's2', name: '이서아', alias: '학생 B' },
+    { id: 's3', name: '박도현', alias: '학생 C' }
+  ],
+  behaviors: [
+    { id: 'b1', name: '자리 이탈 및 배회', code: 'F-1' },
+    { id: 'b2', name: '수업 중 소리지르기', code: 'F-2' },
+    { id: 'b3', name: '책상 치기 / 과제 거부', code: 'F-3' }
+  ],
+  u: 0
+};
+
+/* ───────── 상태 ───────── */
+const EMBED = !!(typeof google !== 'undefined' && google && google.script && google.script.run);
+const URL_RE = /^https:\/\/script\.google\.com\/(a\/(macros\/)?[^/]+\/)?macros\/s\/[\w-]+\/(exec|dev)$/;
+const TEMPLATE_URL = (function () { const u = String(window.TOKTOK_TEMPLATE_URL || '').trim(); return /^https:\/\/docs\.google\.com\/spreadsheets\/d\/[\w-]+\/copy/.test(u) ? u : ''; })();
+function connected() { return EMBED || !!(S.remote && S.remote.url && S.remote.key); }
+let S = { remote: null, cfg: clone(DEFAULT_CFG), cfgDirty: false, logs: [], dirty: {}, since: 0, timers: {}, stealth: false, sid: 's1', lastOk: 0, url: '' };
+let UI = { step: 1, day: today(), period: 'd7', bfilter: '', chart: 'trend', openSec: {}, openId: null, status: 'connecting', report: null, lastErr: '' };
+let charts = {};
+
+/* ───────── 저장(기기) ───────── */
+let saveT = null;
+function save() {
+  clearTimeout(saveT); saveT = null;
+  try {
+    localStorage.setItem(KEY, JSON.stringify({ cfg: S.cfg, cfgDirty: S.cfgDirty, logs: S.logs, dirty: S.dirty, since: S.since, timers: S.timers, stealth: S.stealth, sid: S.sid, lastOk: S.lastOk, remote: S.remote || null }));
+    return true;
+  } catch (e) {
+    toast('이 기기의 저장 공간에 쓰지 못했습니다. 설정에서 백업을 받아 두세요.');
+    return false;
+  }
+}
+function saveSoon() { clearTimeout(saveT); saveT = setTimeout(save, 400); }
+
+function toHMS(s) {
+  const m = /(오전|오후)?\s*(\d{1,2}):(\d{2})(?::(\d{2}))?/.exec(String(s || ''));
+  if (!m) return '00:00:00';
+  let h = Number(m[2]);
+  if (m[1] === '오후' && h < 12) h += 12;
+  if (m[1] === '오전' && h === 12) h = 0;
+  return pad(h) + ':' + m[3] + ':' + (m[4] || '00');
+}
+const OLD_FN = { '과제/활동 회피': 'escape', '교사/또래 관심 획득': 'attention', '선호 사물/활동 획득': 'tangible', '감각 자극 조절': 'sensory', '기타/추가 관찰 요망': 'other' };
+function migrateOld(old) {
+  const cfg = { students: (old.students || []).map((s) => ({ id: s.id, name: s.name, alias: s.alias })), behaviors: (old.targetBehaviors || []).map((b) => ({ id: b.id, name: b.name, code: b.code })), u: Date.now() };
+  const logs = (old.logs || []).map((l) => ({
+    id: String(l.id), d: l.date, t: toHMS(l.time), sid: l.studentId, sn: '', bid: l.behaviorId, bc: l.behaviorCode || '', bn: l.behaviorName || '',
+    type: l.recordType === '지속시간' ? 'dur' : 'freq', lv: l.recordType === '지속시간' ? 0 : (l.intensity || 1), sec: l.durationSec || 0,
+    a: l.a || '', c: l.c || '', fn: OLD_FN[l.hypothesis] || '', u: Date.now()
+  }));
+  return { cfg: cfg, logs: logs };
+}
+
+function load() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (raw) {
+      const p = JSON.parse(raw);
+      if (p.cfg && p.cfg.students && p.cfg.students.length) S.cfg = p.cfg;
+      S.cfgDirty = !!p.cfgDirty;
+      S.logs = Array.isArray(p.logs) ? p.logs : [];
+      S.dirty = p.dirty || {};
+      S.since = p.since || 0;
+      S.timers = p.timers || {};
+      S.stealth = !!p.stealth;
+      S.sid = p.sid || S.sid;
+      S.lastOk = p.lastOk || 0;
+      S.remote = p.remote && p.remote.url ? p.remote : null;
+    } else {
+      const oldRaw = localStorage.getItem('snap_abc_state_v2');
+      if (oldRaw) {
+        const m = migrateOld(JSON.parse(oldRaw));
+        if (m.cfg.students.length) { S.cfg = m.cfg; S.cfgDirty = true; }
+        S.logs = m.logs;
+        S.logs.forEach((l) => { S.dirty[l.id] = 1; });
+        S.sid = S.cfg.students[0].id;
+      }
+    }
+  } catch (e) { /* 손상된 저장본은 무시하고 새로 시작 */ }
+  if (!connected()) S.logs = S.logs.filter((l) => !l.del);
+  if (!activeStudents().some((s) => s.id === S.sid)) S.sid = (activeStudents()[0] || S.cfg.students[0] || {}).id;
+}
+
+/* ───────── 데이터 도우미 ───────── */
+const activeStudents = () => S.cfg.students.filter((s) => !s.archived);
+const activeBehaviors = () => S.cfg.behaviors.filter((b) => !b.archived);
+const stu = (id) => S.cfg.students.find((s) => s.id === id);
+const beh = (id) => S.cfg.behaviors.find((b) => b.id === id);
+const sdisp = (s) => (!s ? '미지정' : (S.stealth ? s.alias : s.name));
+const bdisp = (b) => (!b ? '행동' : (S.stealth ? '행동 [' + b.code + ']' : b.name));
+function ldispB(l) { const b = beh(l.bid); return b ? bdisp(b) : (S.stealth ? '행동 [' + (l.bc || '?') + ']' : (l.bn || '행동')); }
+const vis = (l) => !l.del;
+const byTime = (a, b) => (a.d + a.t < b.d + b.t ? -1 : (a.d + a.t > b.d + b.t ? 1 : 0));
+const studentLogs = (sid) => S.logs.filter((l) => vis(l) && l.sid === sid);
+const dayLogs = (sid, d) => studentLogs(sid).filter((l) => l.d === d).sort(byTime);
+const abcState = (l) => (l.a && l.c ? 'done' : (l.a || l.c ? 'part' : 'wait'));
+
+function touch(l) {
+  l.u = Date.now();
+  if (!l.demo) S.dirty[l.id] = 1;
+  saveSoon(); scheduleSync(2500); renderStatus();
+}
+function touchCfg() {
+  S.cfg.u = Date.now(); S.cfgDirty = true;
+  saveSoon(); scheduleSync(1200); renderStatus();
+}
+
+function inferFn(l) {
+  let best = null, bs = 0, tie = false;
+  FN_KEYS.forEach((k) => {
+    const cl = CLUES[k]; if (!cl) return;
+    let s = 0;
+    if (l.a && cl.a.some((w) => l.a.indexOf(w) >= 0)) s++;
+    if (l.c && cl.c.some((w) => l.c.indexOf(w) >= 0)) s++;
+    if (s > bs) { bs = s; best = k; tie = false; } else if (s === bs && s > 0) tie = true;
+  });
+  return bs > 0 && !tie ? best : null;
+}
+const fnOf = (l) => (l.fn ? { key: l.fn, inferred: false } : (function () { const k = inferFn(l); return k ? { key: k, inferred: true } : null; })());
+
+/* ───────── 토스트 ───────── */
+let toastT = null;
+function toast(msg, undo) {
+  const el = $('#toast');
+  el.hidden = false;
+  el.innerHTML = '<span>' + esc(msg) + '</span>' + (undo ? '<button data-act="undo">취소</button>' : '');
+  toast.undo = undo || null;
+  clearTimeout(toastT);
+  toastT = setTimeout(() => { el.hidden = true; toast.undo = null; }, undo ? 5000 : 2800);
+}
+
+/* ───────── 기록 만들기 ───────── */
+function addLog(o) {
+  const when = o.when || new Date();
+  const st = stu(o.sid), b = beh(o.bid);
+  const l = { id: uid(), d: ymd(when), t: hms(when), sid: o.sid, sn: st ? st.name : '', bid: o.bid, bc: b ? b.code : '', bn: b ? b.name : '', type: o.type, lv: o.lv || 0, sec: o.sec || 0, a: '', c: '', fn: '', u: Date.now() };
+  S.logs.push(l);
+  touch(l); save();
+  return l;
+}
+function deleteLog(id) {
+  const l = S.logs.find((x) => x.id === id); if (!l) return;
+  l.del = true; touch(l); save();
+  UI.openId = UI.openId === id ? null : UI.openId;
+  toast('기록을 삭제했습니다', () => { l.del = false; touch(l); save(); renderAll(); });
+  renderAll();
+}
+function recordFreq(bid, lv) {
+  if (!S.sid) return;
+  const l = addLog({ sid: S.sid, bid: bid, type: 'freq', lv: lv });
+  if (navigator.vibrate) { try { navigator.vibrate(35); } catch (e) { /* 무시 */ } }
+  toast(ldispB(l) + ' · ' + LVL[lv] + ' 기록됨', () => { deleteLog(l.id); $('#toast').hidden = true; });
+  renderAll();
+}
+const tkey = (sid, bid) => sid + '|' + bid;
+function startTimer(bid) {
+  const k = tkey(S.sid, bid);
+  if (S.timers[k]) return;
+  S.timers[k] = { start: Date.now(), sid: S.sid, bid: bid };
+  save(); renderAll();
+}
+function stopTimer(bid) {
+  const k = tkey(S.sid, bid), t = S.timers[k]; if (!t) return;
+  const sec = Math.max(1, Math.round((Date.now() - t.start) / 1000));
+  delete S.timers[k];
+  const l = addLog({ sid: t.sid, bid: t.bid, type: 'dur', sec: sec, when: new Date(t.start) });
+  if (navigator.vibrate) { try { navigator.vibrate([40, 40, 40]); } catch (e) { /* 무시 */ } }
+  toast(ldispB(l) + ' · ' + fmtSec(sec) + ' 기록됨', () => { deleteLog(l.id); $('#toast').hidden = true; });
+  renderAll();
+}
+function discardTimer(bid) { delete S.timers[tkey(S.sid, bid)]; save(); renderAll(); }
+
+/* ───────── 동기화(서버=구글 시트) ───────── */
+let syncing = false, again = false, syncTimer = null, retryTimer = null;
+function run(fn, arg) {
+  if (EMBED) return new Promise((resolve, reject) => { google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[fn](arg); });
+  const rm = S.remote;
+  if (!rm) return Promise.reject(new Error('서버가 연결되지 않았습니다.'));
+  return fetch(rm.url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ key: rm.key, action: fn, payload: arg }) })
+    .then((r) => r.text(), () => { throw new Error('서버에 닿지 못했습니다. 인터넷 연결, 웹 앱 주소, 배포의 액세스 권한(‘모든 사용자’)을 확인하세요.'); })
+    .then((t) => {
+      try { return JSON.parse(t); } catch (e) { throw new Error('서버가 앱 응답 대신 다른 페이지를 보냈습니다. 배포의 액세스 권한이 ‘모든 사용자’인지, 주소가 /exec로 끝나는지 확인하세요.'); }
+    });
+}
+function scheduleSync(ms) { if (!connected()) return; clearTimeout(syncTimer); syncTimer = setTimeout(syncNow, ms || 1200); }
+function pendingCount() { return Object.keys(S.dirty).length + (S.cfgDirty ? 1 : 0); }
+
+async function syncNow() {
+  if (!connected()) { openSettings(); return; }
+  if (syncing) { again = true; return; }
+  syncing = true; UI.status = 'syncing'; renderStatus();
+  clearTimeout(retryTimer);
+  try {
+    let guard = 0;
+    do {
+      again = false;
+      const ids = Object.keys(S.dirty).slice(0, 150);
+      const sent = ids.map((id) => S.logs.find((l) => l.id === id)).filter((l) => l && !l.demo);
+      const snap = {}; sent.forEach((l) => { snap[l.id] = l.u; });
+      const cfgU = S.cfg.u, cfgSent = S.cfgDirty;
+      const res = await run('sync', JSON.parse(JSON.stringify({ since: S.since, logs: sent, config: cfgSent ? S.cfg : null })));
+      if (!res || !res.ok) throw new Error((res && res.error) || '서버 응답 오류');
+      ids.forEach((id) => {
+        const l = S.logs.find((x) => x.id === id);
+        if (!l || l.demo || snap[id] === l.u) delete S.dirty[id];
+      });
+      mergeServer(res);
+      if (cfgSent && S.cfg.u === cfgU) S.cfgDirty = false;
+      S.since = res.serverAt; S.lastOk = Date.now(); S.url = res.url || S.url;
+      S.logs = S.logs.filter((l) => !(l.del && !S.dirty[l.id]));
+      save(); renderAll();
+    } while ((again || pendingCount() > 0) && ++guard < 20);
+    UI.status = 'ok'; UI.lastErr = '';
+  } catch (e) {
+    UI.status = 'err'; UI.lastErr = String((e && e.message) || e);
+    retryTimer = setTimeout(syncNow, 30000);
+  } finally {
+    syncing = false; renderStatus();
+  }
+}
+function mergeServer(res) {
+  const map = new Map(S.logs.map((l) => [l.id, l]));
+  (res.logs || []).forEach((r) => {
+    const mine = map.get(r.id);
+    const keepMine = mine && S.dirty[r.id] && (mine.u || 0) > (r.u || 0);
+    if (keepMine) return;
+    if (r.del) { if (mine) { S.logs.splice(S.logs.indexOf(mine), 1); map.delete(r.id); } delete S.dirty[r.id]; return; }
+    if (mine) { S.logs[S.logs.indexOf(mine)] = r; } else { S.logs.push(r); }
+    map.set(r.id, r);
+  });
+  if (res.config && res.config.students && res.config.students.length && res.config.u >= S.cfg.u) {
+    if (res.config.u > S.cfg.u || !S.cfgDirty) S.cfg = res.config;
+  }
+  if (!activeStudents().some((s) => s.id === S.sid)) S.sid = (activeStudents()[0] || S.cfg.students[0] || {}).id;
+}
+
+/* ───────── 화면: 공통 ───────── */
+function renderStatus() {
+  const b = $('#syncBtn'); let txt, cls = 'pill';
+  const n = pendingCount();
+  if (!connected()) { txt = '기기에만 저장 중'; cls += ' warn'; }
+  else if (UI.status === 'syncing') { txt = '저장 중…'; cls += ' warn'; }
+  else if (UI.status === 'err') { txt = '연결 실패' + (n ? ' · 대기 ' + n : ''); cls += ' err'; }
+  else if (n > 0) { txt = '저장 대기 ' + n; cls += ' warn'; }
+  else if (S.lastOk) { const d = new Date(S.lastOk); txt = '저장됨 ' + pad(d.getHours()) + ':' + pad(d.getMinutes()); cls += ' ok'; }
+  else { txt = '연결 중…'; cls += ' warn'; }
+  b.innerHTML = '<span class="sdot" aria-hidden="true"></span><span class="ptxt">' + esc(txt) + '</span>';
+  b.setAttribute('aria-label', txt); b.className = cls; b.title = (!connected() ? '이 브라우저에만 저장되고 있습니다. 누르면 구글 시트 연결 설정이 열립니다' : (UI.status === 'err' ? '서버 연결 실패. 기기에는 저장되어 있으며 30초마다 다시 시도합니다. ' + UI.lastErr : '구글 시트 저장 상태. 누르면 지금 동기화합니다'));
+  const sb = $('#stealthBtn');
+  sb.innerHTML = S.stealth ? '<span class="stealth-txt">이름 </span>가림 중' : '<span class="stealth-txt">이름 </span>가리기';
+  sb.setAttribute('aria-pressed', S.stealth ? 'true' : 'false'); sb.className = 'pill' + (S.stealth ? ' on' : '');
+}
+function renderChips() {
+  $('#chips').innerHTML = activeStudents().map((s) => {
+    const run = Object.keys(S.timers).some((k) => S.timers[k].sid === s.id);
+    return '<button class="chip-st' + (s.id === S.sid ? ' on' : '') + '" data-act="pick" data-v="' + esc(s.id) + '">' + esc(sdisp(s)) + (run ? '<span class="rec" title="스톱워치 재는 중"></span>' : '') + '</button>';
+  }).join('');
+}
+function renderTabs() {
+  [1, 2, 3].forEach((n) => { $('#tab' + n).className = 'tab' + (UI.step === n ? ' on' : ''); $('#s' + n).hidden = UI.step !== n; });
+  const pend = dayLogs(S.sid, today()).filter((l) => abcState(l) !== 'done').length;
+  const bd = $('#tabBadge'); bd.hidden = !pend; bd.textContent = pend;
+  $('#demoBar').hidden = !S.logs.some((l) => l.demo);
+}
+function badge(l) {
+  return l.type === 'dur' ? '<span class="lv lvd">' + esc(fmtSec(l.sec)) + '</span>' : '<span class="lv lv' + l.lv + '">' + LVL[l.lv] + '</span>';
+}
+function stPill(l) {
+  const s = abcState(l);
+  return '<span class="st ' + s + '">' + (s === 'done' ? '정리 완료' : (s === 'part' ? '일부 정리' : '정리 전')) + '</span>';
+}
+
+/* ───────── 화면: 1단계 ───────── */
+function renderStep1() {
+  const logs = dayLogs(S.sid, today());
+  const bs = activeBehaviors();
+  $('#bgrid').innerHTML = bs.length ? bs.map((b) => {
+    const mine = logs.filter((l) => l.bid === b.id);
+    const n = [0, 0, 0, 0]; mine.filter((l) => l.type === 'freq').forEach((l) => { n[l.lv]++; });
+    const durSum = sum(mine.filter((l) => l.type === 'dur'), (l) => l.sec);
+    const k = tkey(S.sid, b.id), running = !!S.timers[k];
+    return '<div class="card bcard' + (running ? ' run' : '') + '">' +
+      '<div class="rowb" style="align-items:flex-start"><div><span class="code">' + esc(b.code) + '</span><div class="bname">' + esc(bdisp(b)) + '</div></div>' +
+      '<div style="text-align:right"><span class="cnt">' + mine.length + '회</span><div class="small mute">' + (durSum ? '지속 합계 ' + esc(fmtSec(durSum)) : '') + '</div></div></div>' +
+      '<div class="mini3"><span class="m1">약 ' + n[1] + '</span><span class="m2">중 ' + n[2] + '</span><span class="m3">강 ' + n[3] + '</span></div>' +
+      '<div><div class="lab">빈도</div><div class="btn3">' +
+      '<button class="tap tap1" data-act="freq" data-b="' + esc(b.id) + '" data-lv="1">1단계<small>약</small></button>' +
+      '<button class="tap tap2" data-act="freq" data-b="' + esc(b.id) + '" data-lv="2">2단계<small>중</small></button>' +
+      '<button class="tap tap3" data-act="freq" data-b="' + esc(b.id) + '" data-lv="3">3단계<small>강</small></button></div></div>' +
+      '<div class="sw"><div class="swrow"><span class="lab" style="margin:0">지속시간</span><span class="clock" data-timer="' + esc(k) + '">00:00</span></div>' +
+      (running ? '<div style="display:flex;gap:6px"><button class="stop-btn" data-act="stop" data-b="' + esc(b.id) + '">종료하고 저장</button><button class="x-btn" data-act="discard" data-b="' + esc(b.id) + '">취소</button></div>'
+        : '<button class="dark-btn" data-act="start" data-b="' + esc(b.id) + '">스톱워치 시작</button>') +
+      '</div></div>';
+  }).join('') : '<div class="empty card">표적행동이 없습니다. 오른쪽 위 설정에서 추가해 주세요.</div>';
+
+  const recent = logs.slice().reverse().slice(0, 6);
+  $('#mini').innerHTML = recent.length ? recent.map((l) =>
+    '<div class="tli"><div class="l"><span class="time">' + esc(l.t) + '</span><b>' + esc(ldispB(l)) + '</b>' + badge(l) + stPill(l) + '</div>' +
+    '<button class="linkbtn red" data-act="del" data-id="' + esc(l.id) + '">삭제</button></div>').join('')
+    : '<div class="empty small">오늘 기록이 아직 없습니다. 위 버튼을 눌러 시작하세요.</div>';
+  tick();
+}
+function tick() {
+  document.querySelectorAll('[data-timer]').forEach((el) => {
+    const t = S.timers[el.getAttribute('data-timer')]; if (!t) return;
+    const sec = Math.floor((Date.now() - t.start) / 1000);
+    el.textContent = pad(Math.floor(sec / 60)) + ':' + pad(sec % 60);
+  });
+}
+
+/* ───────── 화면: 2단계 ───────── */
+function chipValues(f) {
+  const presets = f === 'a' ? PRESET_A : PRESET_C, cnt = {};
+  S.logs.forEach((l) => { if (vis(l) && l[f] && presets.indexOf(l[f]) < 0) cnt[l[f]] = (cnt[l[f]] || 0) + 1; });
+  const custom = Object.keys(cnt).sort((x, y) => cnt[y] - cnt[x]).slice(0, 6);
+  return { presets: presets, custom: custom };
+}
+function chipsHtml(f, l) {
+  const v = chipValues(f);
+  const one = (txt, cu) => '<button type="button" class="chip' + (cu ? ' cu' : '') + (l[f] === txt ? ' on' : '') + '" data-act="chip" data-id="' + esc(l.id) + '" data-f="' + f + '" data-v="' + esc(txt) + '">' + esc(txt) + '</button>';
+  return v.presets.map((t) => one(t, false)).join('') + v.custom.map((t) => one(t, true)).join('');
+}
+function hintHtml(l) {
+  if (l.fn) return '';
+  const k = inferFn(l);
+  return k ? '적어 주신 상황으로 보면 “' + esc(FN[k]) + '” 때문일 수 있어요. (참고용이에요. 직접 고르시면 그 값을 씁니다)' : '';
+}
+function rowHtml(l) {
+  const open = UI.openId === l.id, st = abcState(l);
+  let h = '<div class="row ' + st + '"><div class="rh" data-act="toggle" data-id="' + esc(l.id) + '"><div class="l"><span class="time">' + esc(l.t) + '</span><span class="rname">' + esc(ldispB(l)) + '</span>' + badge(l) + '</div><div>' + stPill(l) + ' <span class="mute">' + (open ? '▲' : '▼') + '</span></div></div>';
+  if (!open && st !== 'wait') {
+    h += '<div class="sum"><div><b>A</b> ' + esc(l.a || '-') + '</div><div><b>C</b> ' + esc(l.c || '-') + '</div><div style="color:#6366f1;font-weight:700">' + (l.fn ? '기능: ' + esc(FN[l.fn]) : '') + '</div></div>';
+  }
+  if (open) {
+    h += '<div class="panel">' +
+      '<div><div class="lab">직전 상황 (A) · 행동 바로 전에 무슨 일이 있었나요?</div><div class="chipset">' + chipsHtml('a', l) + '</div><input class="inp" data-field="a" data-id="' + esc(l.id) + '" value="' + esc(l.a) + '" maxlength="200" placeholder="직접 입력…"></div>' +
+      '<div><div class="lab">그 뒤 반응 (C) · 행동 뒤에 어떻게 됐나요?</div><div class="chipset">' + chipsHtml('c', l) + '</div><input class="inp" data-field="c" data-id="' + esc(l.id) + '" value="' + esc(l.c) + '" maxlength="200" placeholder="직접 입력…"></div>' +
+      '<div><div class="lab">행동의 이유 (추정)</div><select class="inp" data-field="fn" data-id="' + esc(l.id) + '"><option value="">미지정</option>' +
+      FN_KEYS.map((k) => '<option value="' + k + '"' + (l.fn === k ? ' selected' : '') + '>' + esc(FN[k]) + '</option>').join('') + '</select><div class="hint" id="hint_' + esc(l.id) + '">' + hintHtml(l) + '</div></div>' +
+      (l.type === 'freq' ? '<div><div class="lab">강도 바로잡기 (잘못 눌렀을 때)</div><div class="btn3">' + [1, 2, 3].map((n) =>
+        '<button class="chip' + (l.lv === n ? ' on' : '') + '" data-act="setLv" data-id="' + esc(l.id) + '" data-lv="' + n + '">' + n + '단계 ' + LVL[n] + '</button>').join('') + '</div></div>' : '') +
+      '<div class="rowb"><button class="linkbtn red" data-act="del" data-id="' + esc(l.id) + '">이 기록 삭제</button><button class="mini dk" data-act="closeRow" data-id="' + esc(l.id) + '">완료</button></div>' +
+      '<div class="small mute">입력은 칸을 바꾸는 즉시 자동 저장됩니다.</div></div>';
+  }
+  return h + '</div>';
+}
+function renderList() {
+  const logs = dayLogs(S.sid, UI.day).reverse();
+  $('#dayPick').value = UI.day;
+  $('#dayCount').textContent = logs.length + '건';
+  const pend = logs.filter((l) => abcState(l) !== 'done').length;
+  $('#pending').innerHTML = logs.length ? '<div class="note">' + (pend ? '<b>' + dayLabel(UI.day) + ' 정리할 기록 ' + pend + '건</b> 카드를 눌러 직전 상황과 그 뒤 반응을 골라 주세요. 두 번 누르면 끝납니다.' : '<b>이 날의 기록을 모두 정리했습니다.</b> <button class="linkbtn" data-act="step" data-v="3">행동 리포트 보기</button>') + '</div>' : '';
+  $('#list').innerHTML = logs.length ? logs.map(rowHtml).join('')
+    : '<div class="empty"><p>' + esc(dayLabel(UI.day)) + '에 기록된 행동이 없습니다.</p><p class="small">다른 날짜를 보려면 ◀ ▶ 를 누르세요.</p></div>';
+}
+
+/* ───────── 3단계: 추이·리포트 ───────── */
+const PERIODS = [['d1', '오늘'], ['d7', '최근 7일'], ['d30', '최근 30일'], ['all', '전체']];
+const CHARTS = [['trend', '빈도 추이'], ['dur', '지속시간'], ['beh', '행동별'], ['fn', '행동의 이유']];
+const CHART_NOTE = {
+  trend: '막대 하나가 하루입니다. 약·중·강 횟수를 쌓아서 보여 줍니다.',
+  dur: '하루 동안 기록된 지속시간의 합계(분)입니다.',
+  beh: '선택한 기간에 행동별로 기록된 횟수입니다.',
+  fn: '선생님이 고른 ‘행동의 이유’가 우선이고, 비어 있으면 적힌 상황으로 추정한 값(상황으로 추정)을 씁니다.'
+};
+function rangeInfo() {
+  const end = today();
+  let from, pf = null, pt = null;
+  if (UI.period === 'd1') { from = end; pt = pf = addDays(end, -1); }
+  else if (UI.period === 'd7') { from = addDays(end, -6); pt = addDays(from, -1); pf = addDays(pt, -6); }
+  else if (UI.period === 'd30') { from = addDays(end, -29); pt = addDays(from, -1); pf = addDays(pt, -29); }
+  else { const ds = scopeLogs().map((l) => l.d).sort(); from = ds[0] || end; }
+  return { from: from, end: end, pf: pf, pt: pt };
+}
+function scopeLogs() { return studentLogs(S.sid).filter((l) => !UI.bfilter || l.bid === UI.bfilter); }
+const between = (logs, a, b) => (a ? logs.filter((l) => l.d >= a && l.d <= b) : []);
+
+function renderPeriodUi() {
+  $('#periodSeg').innerHTML = PERIODS.map((o) => '<button class="' + (UI.period === o[0] ? 'on' : '') + '" data-act="period" data-v="' + o[0] + '">' + o[1] + '</button>').join('');
+  $('#bsel').innerHTML = '<option value="">전체 행동</option>' + S.cfg.behaviors.map((b) => '<option value="' + esc(b.id) + '"' + (UI.bfilter === b.id ? ' selected' : '') + '>' + esc(bdisp(b)) + (b.archived ? ' (보관)' : '') + '</option>').join('');
+}
+function kpiHtml(k, v, d) { return '<div class="kpi"><div class="k">' + k + '</div><div class="v">' + v + '</div><div class="d">' + (d || '&nbsp;') + '</div></div>'; }
+function deltaTxt(now, prev, unit, hasPrev) {
+  if (!hasPrev) return '';
+  const diff = now - prev;
+  return '직전 기간 ' + prev + unit + ' → ' + (diff === 0 ? '변화 없음' : (diff > 0 ? '▲ +' : '▼ −') + Math.abs(diff) + unit);
+}
+function mkChart(id, cfg) {
+  if (charts[id]) { charts[id].destroy(); charts[id] = null; }
+  const el = document.getElementById(id); if (!el) return;
+  if (window.Chart.defaults) { window.Chart.defaults.color = '#5b6b7d'; window.Chart.defaults.borderColor = '#e3ebf3'; window.Chart.defaults.font.family = 'Pretendard,system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif'; window.Chart.defaults.font.size = 12; }
+  charts[id] = new window.Chart(el, cfg);
+}
+function chartConfig(kind, r, all, logs) {
+  let tf = UI.period === 'd1' ? addDays(r.end, -6) : r.from;
+  if (tf < addDays(r.end, -89)) tf = addDays(r.end, -89);
+  const days = daysList(tf, r.end), inTrend = between(all, tf, r.end), labels = days.map(dayLabel);
+  const base = { responsive: true, maintainAspectRatio: false };
+  if (kind === 'trend') {
+    return { type: 'bar', data: { labels: labels, datasets: [1, 2, 3].map((lv) => ({ label: LVL[lv], backgroundColor: COLORS[lv], borderRadius: 3, data: days.map((d) => inTrend.filter((l) => l.d === d && l.type === 'freq' && l.lv === lv).length) })) },
+      options: Object.assign({}, base, { scales: { x: { stacked: true, ticks: { maxRotation: 60, autoSkip: true } }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } } }, plugins: { legend: { position: 'bottom' } } }) };
+  }
+  if (kind === 'dur') {
+    const v = days.map((d) => Math.round(sum(inTrend.filter((l) => l.d === d && l.type === 'dur'), (l) => l.sec) / 6) / 10);
+    return { type: 'line', data: { labels: labels, datasets: [{ label: '지속시간(분)', data: v, borderColor: '#2b5684', backgroundColor: 'rgba(43,86,132,.10)', fill: true, tension: .25, pointRadius: 3 }] },
+      options: Object.assign({}, base, { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }) };
+  }
+  if (kind === 'beh') {
+    const cnt = {}; logs.forEach((l) => { const n = ldispB(l); cnt[n] = (cnt[n] || 0) + 1; });
+    const ks = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a]);
+    return { type: 'bar', data: { labels: ks.length ? ks : ['기록 없음'], datasets: [{ label: '횟수', data: ks.length ? ks.map((k) => cnt[k]) : [0], backgroundColor: '#86b9e3', borderRadius: 6 }] },
+      options: Object.assign({}, base, { indexAxis: 'y', scales: { x: { beginAtZero: true, ticks: { precision: 0 } } }, plugins: { legend: { display: false } } }) };
+  }
+  const fc = {}; logs.forEach((l) => { const f = fnOf(l); if (f) { const k = FN[f.key] + (f.inferred ? ' (상황으로 추정)' : ''); fc[k] = (fc[k] || 0) + 1; } });
+  const fk = Object.keys(fc);
+  return { type: 'doughnut', data: { labels: fk.length ? fk : ['기록 없음'], datasets: [{ data: fk.length ? fk.map((k) => fc[k]) : [1], backgroundColor: fk.length ? ['#2b5684', '#86b9e3', '#8fbfa6', '#dcbd76', '#d49a9a', '#a9b6c4', '#c9d8e6'] : ['#e4eef8'] }] },
+    options: Object.assign({}, base, { plugins: { legend: { position: 'bottom' } } }) };
+}
+function renderDash() {
+  if (UI.step !== 3) return;
+  renderPeriodUi();
+  const r = rangeInfo();
+  $('#dashWho').textContent = '[' + sdisp(stu(S.sid)) + ']';
+  const all = scopeLogs(), logs = between(all, r.from, r.end), prev = between(all, r.pf, r.pt), hasPrev = !!r.pf;
+  const fq = logs.filter((l) => l.type === 'freq'), pq = prev.filter((l) => l.type === 'freq');
+  const hi = fq.filter((l) => l.lv === 3).length;
+  const ds = sum(logs.filter((l) => l.type === 'dur'), (l) => l.sec), pds = sum(prev.filter((l) => l.type === 'dur'), (l) => l.sec);
+  const full = logs.filter((l) => abcState(l) === 'done').length;
+  $('#kpis').innerHTML =
+    kpiHtml('빈도 기록', fq.length + '회', deltaTxt(fq.length, pq.length, '회', hasPrev)) +
+    kpiHtml('3단계(강) 비율', fq.length ? Math.round(hi / fq.length * 100) + '%' : '-', hi + '회') +
+    kpiHtml('지속시간 합계', ds ? esc(fmtSec(ds)) : '-', hasPrev && (ds || pds) ? '직전 기간 ' + esc(fmtSec(pds)) : '') +
+    kpiHtml('정리 완성률', logs.length ? Math.round(full / logs.length * 100) + '%' : '-', full + ' / ' + logs.length + '건');
+
+  const tf = UI.period === 'd1' ? addDays(r.end, -6) : r.from;
+  const hasDur = between(all, tf, r.end).some((l) => l.type === 'dur');
+  const avail = CHARTS.filter((c) => (c[0] !== 'dur' || hasDur) && (c[0] !== 'beh' || !UI.bfilter));
+  if (!avail.some((c) => c[0] === UI.chart)) UI.chart = 'trend';
+  $('#chartSeg').innerHTML = avail.map((c) => '<button class="' + (UI.chart === c[0] ? 'on' : '') + '" data-act="chart" data-v="' + c[0] + '">' + c[1] + '</button>').join('');
+  $('#chartNote').textContent = CHART_NOTE[UI.chart] + (UI.chart !== 'beh' && UI.chart !== 'fn' && UI.period === 'd1' ? ' (오늘 포함 최근 7일)' : '');
+  const hasChart = !!window.Chart;
+  $('#noChart').hidden = hasChart; $('#chartWrap').hidden = !hasChart;
+  if (hasChart) mkChart('cMain', chartConfig(UI.chart, r, all, logs));
+  makeReport();
+}
+
+/* ───────── 규칙 기반 리포트 (외부 전송 없음) ───────── */
+const INTERV = {
+  escape: ['과제의 분량·난이도를 줄이고 작은 단계로 나누어 제시하며, 시각적 일정표·타이머로 “끝이 보이게” 합니다.', '“쉬고 싶어요/도와주세요” 카드나 말로 요청하는 대체행동을 가르치고, 요청했을 때 즉시 짧게 허용합니다.', '문제행동으로 과제가 면제되지 않도록 일관되게 대응하고, 과제를 마치면 선호 활동으로 이어지게 구성합니다.'],
+  attention: ['행동이 나오기 전에 정해진 간격으로 관심·칭찬을 미리 제공합니다(비수반 강화).', '손들기·이름 부르기 등 적절하게 관심을 요청하는 방법을 가르치고, 그렇게 했을 때 즉시 반응합니다.', '안전이 보장되는 범위에서 문제행동에는 반응을 최소화하고, 바람직한 행동에는 즉시 강화합니다.'],
+  tangible: ['“먼저–그다음” 판과 타이머로 선호 물건·활동을 언제 쓸 수 있는지 시각적으로 알려 줍니다.', '말·카드로 요청하는 방법을 가르치고, 요청 시 허용하되 기다리는 시간을 조금씩 늘립니다.', '거절·종료 규칙을 일관되게 유지하고, 대안 활동을 함께 제시합니다.'],
+  sensory: ['소음·조명·좌석 위치 등 환경을 조정해 자극 강도를 낮춥니다.', '감각 휴식 시간·도구(이어머프 등)를 미리 계획해 허용하고, 요청하는 방법을 가르칩니다.', '필요하면 작업치료사·특수교사와 감각 프로파일을 함께 검토합니다.'],
+  other: ['행동의 이유를 말하기엔 기록이 부족합니다. 직전 상황·그 뒤 반응·행동의 이유를 더 적은 뒤 다시 확인하세요.']
+};
+
+function buildReport(P) {
+  const logs = P.logs, prev = P.prev || [], S_ = [];
+  const freq = logs.filter((l) => l.type === 'freq'), dur = logs.filter((l) => l.type === 'dur');
+  const lvN = [0, 0, 0, 0]; freq.forEach((l) => { lvN[l.lv]++; });
+  const activeDays = Array.from(new Set(logs.map((l) => l.d))).sort();
+  const who = P.studentLabel + (P.behaviorLabel ? ' · ' + P.behaviorLabel : '');
+  const head = who + ' — ' + P.rangeLabel;
+  if (!logs.length) {
+    return { head: head, brief: ['선택한 기간·행동에 기록이 없습니다. 기간을 넓히거나 1단계에서 먼저 기록해 주세요.'], sections: [], text: head + '\n선택한 기간에 기록이 없습니다.' };
+  }
+
+  // 1 요약
+  const s1 = ['관찰 기간 ' + P.from + ' ~ ' + P.to + ' 중 기록이 있는 날은 ' + activeDays.length + '일입니다.',
+    '빈도 기록 ' + freq.length + '회 (약 ' + lvN[1] + ' · 중 ' + lvN[2] + ' · 강 ' + lvN[3] + ').'];
+  if (dur.length) { const t = sum(dur, (l) => l.sec), mx = Math.max.apply(null, dur.map((l) => l.sec)); s1.push('지속시간 ' + dur.length + '건, 합계 ' + fmtSec(t) + ', 평균 ' + fmtSec(t / dur.length) + ', 최장 ' + fmtSec(mx) + '.'); }
+  const full = logs.filter((l) => abcState(l) === 'done').length;
+  s1.push('직전 상황과 그 뒤 반응을 모두 적은 기록 ' + full + ' / ' + logs.length + '건 (' + Math.round(full / logs.length * 100) + '%).');
+  S_.push({ h: '1. 데이터 요약', items: s1 });
+
+  // 2 추이
+  const s2 = [];
+  if (P.hasPrev) {
+    const pf = prev.filter((l) => l.type === 'freq'), ph = pf.filter((l) => l.lv === 3).length;
+    const d1 = freq.length - pf.length, d2 = lvN[3] - ph;
+    s2.push('직전 같은 길이의 기간과 비교하면 빈도는 ' + pf.length + '회 → ' + freq.length + '회(' + (d1 === 0 ? '변화 없음' : (d1 > 0 ? '+' : '−') + Math.abs(d1) + '회') + '), 강(3단계)은 ' + ph + '회 → ' + lvN[3] + '회(' + (d2 === 0 ? '변화 없음' : (d2 > 0 ? '+' : '−') + Math.abs(d2) + '회') + ')입니다.');
+    s2.push('관찰한 날수·시간이 달랐다면 단순 비교는 조심해야 합니다.');
+  }
+  if (P.days.length >= 6 && freq.length >= 6) {
+    const mid = Math.floor(P.days.length / 2), cut = P.days[mid];
+    const f1 = freq.filter((l) => l.d < cut).length, f2 = freq.filter((l) => l.d >= cut).length;
+    s2.push('기간을 앞·뒤 절반으로 나누면 ' + f1 + '회 → ' + f2 + '회로 ' + (f2 > f1 ? '뒤쪽이 더 많습니다.' : (f2 < f1 ? '뒤쪽이 더 적습니다.' : '같습니다.')));
+  } else {
+    s2.push('기록 일수·횟수가 적어(6일·6회 미만) 흐름을 말하기엔 이릅니다.');
+  }
+  const perDay = {}; freq.forEach((l) => { perDay[l.d] = (perDay[l.d] || 0) + 1; });
+  const pk = Object.keys(perDay).sort((a, b) => perDay[b] - perDay[a] || (a < b ? -1 : 1))[0];
+  if (pk) s2.push('빈도가 가장 많았던 날은 ' + dayLabel(pk) + ' (' + perDay[pk] + '회)입니다.');
+  S_.push({ h: '2. 추이', items: s2 });
+
+  // 3 패턴
+  const s3 = [];
+  if (!P.behaviorLabel) {
+    const bc = {}; logs.forEach((l) => { const n = P.bname(l); bc[n] = (bc[n] || 0) + 1; });
+    const bk = Object.keys(bc).sort((a, b) => bc[b] - bc[a]);
+    if (bk.length > 1) s3.push('행동별: ' + bk.slice(0, 3).map((k) => k + ' ' + bc[k] + '건').join(' · '));
+  }
+  const hc = {}; logs.forEach((l) => { const h = Number(l.t.slice(0, 2)); hc[h] = (hc[h] || 0) + 1; });
+  const hk = Object.keys(hc).sort((a, b) => hc[b] - hc[a]);
+  if (logs.length >= 5 && hk.length) {
+    const top = hk[0], share = hc[top] / logs.length;
+    s3.push(share >= 0.4 ? '시간대: ' + top + '시대에 ' + hc[top] + '건(' + Math.round(share * 100) + '%)이 몰려 있습니다. 그 시간대의 수업·활동을 확인해 보세요.' : '시간대: 특정 시간에 크게 몰리지 않고 흩어져 있습니다 (가장 많은 ' + top + '시대 ' + hc[top] + '건).');
+  } else { s3.push('시간대: 기록이 5건 미만이라 경향을 말하기 어렵습니다.'); }
+  [['a', '자주 적힌 직전 상황'], ['c', '자주 적힌 그 뒤 반응']].forEach((p) => {
+    const cc = {}; logs.forEach((l) => { if (l[p[0]]) cc[l[p[0]]] = (cc[l[p[0]]] || 0) + 1; });
+    const ck = Object.keys(cc).sort((a, b) => cc[b] - cc[a]);
+    if (ck.length) s3.push(p[1] + ': ' + ck.slice(0, 3).map((k) => k + ' ' + cc[k] + '건').join(' · '));
+  });
+  S_.push({ h: '3. 행동 패턴', items: s3 });
+
+  // 4 행동의 이유
+  const s4 = [], fc = {}; let declared = 0, inferred = 0;
+  logs.forEach((l) => { const f = fnOf(l); if (f) { fc[f.key] = (fc[f.key] || 0) + 1; if (f.inferred) inferred++; else declared++; } });
+  const fkeys = Object.keys(fc).sort((a, b) => fc[b] - fc[a]);
+  const n = declared + inferred;
+  let topFn = null;
+  if (!n) { s4.push('행동의 이유나 상황이 적히지 않아 이유를 추정할 수 없습니다.'); }
+  else {
+    topFn = fkeys[0];
+    const share = fc[topFn] / n;
+    s4.push('분포: ' + fkeys.map((k) => FN[k] + ' ' + fc[k] + '건').join(' · ') + ' (선생님 선택 ' + declared + '건, 상황으로 추정 ' + inferred + '건).');
+    let conf;
+    if (n < 5) conf = '기록이 5건 미만이라 가설을 세우기엔 이릅니다. 참고만 하세요.';
+    else if (n >= 10 && share >= 0.6) conf = '“' + FN[topFn] + '”가 ' + Math.round(share * 100) + '%로 비교적 일관됩니다.';
+    else conf = '“' + FN[topFn] + '”가 가장 많지만 ' + (n < 10 ? '기록이 10건 미만이거나 ' : '') + '비중이 ' + Math.round(share * 100) + '%라 잠정 가설입니다.';
+    s4.push('해석: ' + conf);
+    s4.push('이 구분(5건·10건·60%)은 이 앱이 임의로 정한 기준이며, 공인된 진단 기준이 아닙니다.');
+  }
+  S_.push({ h: '4. 행동의 이유 (추정)', items: s4 });
+
+  // 5 중재
+  const s5 = (topFn && n >= 3 ? INTERV[topFn] : INTERV.other).slice();
+  S_.push({ h: '5. 중재 방향 (일반적인 기능 기반 접근)', items: s5 });
+  const crisis = lvN[3] >= 3 || (freq.length >= 5 && lvN[3] / freq.length >= 0.2);
+  if (crisis) S_.push({ h: '안전 확인 필요', crisis: true, items: ['강(3단계) 기록이 ' + lvN[3] + '회(' + Math.round(lvN[3] / Math.max(1, freq.length) * 100) + '%)입니다. 학생과 주변 사람의 안전 계획을 먼저 점검하고, 학교의 위기 대응 절차와 특수교사·상담교사·행동지원 전문가와 협의하세요.', '이 리포트는 안전을 판단하는 도구가 아닙니다.'] });
+
+  // 6 학부모
+  const tb = hk.length && hc[hk[0]] / logs.length >= 0.4 ? hk[0] + '시대를 중심으로 ' : '';
+  const s6 = ['관찰 기간 동안 ' + (P.behaviorLabel ? P.behaviorLabel + '이(가) ' : '표적행동이 ') + tb + '총 ' + logs.length + '건 기록되었습니다 (강 ' + lvN[3] + '회).',
+    '먼저 잘하고 있는 점이나 호전된 부분을 함께 말씀드리고, 행동은 “무엇을 하는지” 중심으로 설명합니다 (낙인 표현 피하기).',
+    topFn && n >= 5 ? '학교에서는 “' + FN[topFn] + '” 목적일 가능성을 두고 지원을 시도하고 있으며, 가정에서도 같은 신호·대체행동(요청 카드, 손들기 등)을 쓰면 효과가 커질 수 있습니다.' : '아직 원인을 단정하기엔 기록이 적어, 가정에서 비슷한 행동이 언제 나타나는지 함께 살펴봐 주시길 요청합니다.'];
+  S_.push({ h: '6. 학부모 상담 요점', items: s6 });
+
+  // 7 다음 관찰
+  const s7 = [], pendingN = logs.length - full;
+  if (pendingN) s7.push('상황이 비어 있는 기록 ' + pendingN + '건을 먼저 채워 주세요.');
+  if (!n || n < 5) s7.push('행동의 이유를 추정하려면 상황과 이유가 적힌 기록이 5건 이상 필요합니다.');
+  s7.push('행동이 “없었던” 시간·상황도 기록해 비교하면 유발 요인을 좁히는 데 도움이 됩니다.');
+  S_.push({ h: '7. 다음 관찰 제안', items: s7 });
+
+  // 한눈에 보기 (3~4줄)
+  const brief = [];
+  const pfN = P.hasPrev ? prev.filter((l) => l.type === 'freq').length : null;
+  brief.push('빈도 ' + freq.length + '회' + (pfN === null ? ' (약 ' + lvN[1] + ' · 중 ' + lvN[2] + ' · 강 ' + lvN[3] + ')'
+    : (freq.length === pfN ? ' — 직전 기간과 같음' : ' — 직전 기간(' + pfN + '회)보다 ' + Math.abs(freq.length - pfN) + '회 ' + (freq.length > pfN ? '많음' : '적음'))));
+  brief.push(topFn ? '추정되는 행동의 이유: ' + FN[topFn] + ' (' + (n < 5 ? '근거 부족' : (n >= 10 && fc[topFn] / n >= 0.6 ? '비교적 일관' : '잠정')) + ')' : '행동의 이유: 아직 근거 부족');
+  if (crisis) brief.push('강도 높은 행동이 반복됩니다. 안전 계획부터 점검하세요.');
+  brief.push('다음 할 일: ' + (pendingN ? '정리 안 된 기록 ' + pendingN + '건 채우기' : (topFn && n >= 5 ? '중재 방향 하나를 정해 실행하고 추이 비교하기' : '이유가 적힌 기록 5건 이상 모으기')));
+
+  const disclaimer = '이 리포트는 입력된 숫자와 상황 기록을 규칙에 따라 정리한 참고 자료입니다. AI가 아니며 진단·평가를 대신하지 않습니다.';
+  const text = head + '\n\n[한눈에 보기]\n' + brief.map((b) => '- ' + b).join('\n') + '\n\n' + S_.map((s) => s.h + '\n' + s.items.map((i) => '- ' + i).join('\n')).join('\n\n') + '\n\n' + disclaimer;
+  return { head: head, brief: brief, sections: S_, text: text, disclaimer: disclaimer };
+}
+function makeReport() {
+  const r = rangeInfo(), all = scopeLogs();
+  const lab = { d1: '오늘 ' + dayLabel(r.end), d7: '최근 7일', d30: '최근 30일', all: '전체 기간' }[UI.period];
+  const b = UI.bfilter ? beh(UI.bfilter) : null;
+  UI.report = buildReport({
+    logs: between(all, r.from, r.end), prev: between(all, r.pf, r.pt), hasPrev: !!r.pf, from: r.from, to: r.end, days: daysList(r.from, r.end),
+    studentLabel: sdisp(stu(S.sid)), behaviorLabel: b ? bdisp(b) : '', rangeLabel: lab, bname: ldispB
+  });
+  renderReport();
+}
+function renderReport() {
+  const R = UI.report, box = $('#report'); if (!R) return;
+  box.innerHTML = '<div class="brief"><div class="bh">' + esc(R.head) + '</div><ul>' + (R.brief || []).map((i) => '<li>' + esc(i) + '</li>').join('') + '</ul></div>' +
+    R.sections.map((s) => '<details class="rs' + (s.crisis ? ' crisis' : '') + '" data-h="' + esc(s.h) + '"' + (s.crisis || UI.openSec[s.h] ? ' open' : '') + '><summary>' + esc(s.h) + '</summary><ul>' +
+      s.items.map((i) => '<li>' + esc(i) + '</li>').join('') + '</ul></details>').join('') +
+    (R.disclaimer ? '<p class="foot">' + esc(R.disclaimer) + '</p>' : '') + aiHtml();
+}
+const PDF_LIB = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+function loadPdfLib() {
+  if (window.html2pdf) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const sc = document.createElement('script');
+    sc.src = PDF_LIB;
+    sc.onload = () => (window.html2pdf ? resolve() : reject(new Error('PDF 도구 없음')));
+    sc.onerror = () => reject(new Error('PDF 도구를 불러오지 못함'));
+    document.head.appendChild(sc);
+  });
+}
+function trendImage(r, all) {
+  if (!window.Chart) return '';
+  const holder = document.createElement('div');
+  holder.style.cssText = 'position:fixed;left:-10000px;top:0;width:700px;height:260px';
+  const cv = document.createElement('canvas'); cv.width = 700; cv.height = 260; holder.appendChild(cv); document.body.appendChild(holder);
+  const cfg = chartConfig('trend', r, all, []);
+  cfg.options = Object.assign({}, cfg.options, { responsive: false, animation: false, devicePixelRatio: 2 });
+  let url = '';
+  try { const c = new window.Chart(cv, cfg); url = cv.toDataURL('image/png'); c.destroy(); } catch (e) { url = ''; }
+  holder.remove();
+  return url;
+}
+function buildPdfArea() {
+  if (!UI.report) makeReport();
+  const R = UI.report, r = rangeInfo(), all = scopeLogs();
+  const b = UI.bfilter ? beh(UI.bfilter) : null;
+  const periodLab = { d1: '오늘', d7: '최근 7일', d30: '최근 30일', all: '전체 기간' }[UI.period];
+  const img = trendImage(r, all);
+  const wrap = document.createElement('div'); wrap.id = 'pdfArea';
+  const el = document.createElement('div'); el.className = 'pdf-doc'; wrap.appendChild(el);
+  el.innerHTML =
+    '<div class="pdf-head"><div><div class="pdf-app">톡톡! 행동기록장</div><h1>행동 리포트</h1></div><div class="pdf-app">작성일 ' + esc(today()) + '</div></div>' +
+    '<table><tr><th>학생</th><td>' + esc(sdisp(stu(S.sid))) + '</td><th>기간</th><td>' + esc(periodLab + ' (' + r.from + ' ~ ' + r.end + ')') + '</td></tr>' +
+    '<tr><th>대상 행동</th><td>' + esc(b ? bdisp(b) : '전체 행동') + '</td><th>비교 기준</th><td>' + (r.pf ? esc(r.pf + ' ~ ' + r.pt) : '없음') + '</td></tr></table>' +
+    '<div class="kpis">' + $('#kpis').innerHTML + '</div>' +
+    (img ? '<div class="pdf-chart"><div class="pdf-cap">일별 빈도 (약·중·강)</div><img alt="" src="' + img + '"></div>' : '') +
+    '<div class="pdf-sec"><h2>한눈에 보기</h2><div class="pdf-brief"><ul>' + (R.brief || []).map((i) => '<li>' + esc(i) + '</li>').join('') + '</ul></div></div>' +
+    R.sections.map((sx) => '<div class="pdf-sec' + (sx.crisis ? ' crisis' : '') + '"><h2>' + esc(sx.h) + '</h2><ul>' + sx.items.map((i) => '<li>' + esc(i) + '</li>').join('') + '</ul></div>').join('') +
+    aiPdfHtml() +
+    '<p class="pdf-foot">' + esc(R.disclaimer || '') + ' 학생 정보가 담긴 문서이므로 보관·공유에 주의해 주세요.</p>';
+  return wrap;
+}
+function pdfName() {
+  const st = activeStudents().concat(S.cfg.students.filter((x) => x.archived)).findIndex((x) => x.id === S.sid);
+  return 'toktok_report_' + (st >= 0 ? 'S' + (st + 1) + '_' : '') + today() + '.pdf';
+}
+async function savePdf() {
+  const btn = $('#pdfBtn');
+  if (btn.disabled) return;
+  btn.disabled = true; btn.textContent = 'PDF 만드는 중…';
+  const wrap = buildPdfArea();
+  document.body.appendChild(wrap);
+  const el = wrap.firstChild;
+  try {
+    await loadPdfLib();
+    await window.html2pdf().set({
+      margin: [12, 12, 14, 12], filename: pdfName(),
+      image: { type: 'jpeg', quality: 0.95 },
+      html2canvas: { scale: 2, backgroundColor: '#ffffff', useCORS: true, scrollX: 0, scrollY: 0 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['css', 'legacy'], avoid: ['li', 'h2', '.kpis', '.pdf-chart', 'table'] }
+    }).from(el).save();
+    toast('PDF를 저장했습니다');
+  } catch (e) {
+    toast('PDF 파일을 바로 만들지 못해 인쇄 창을 엽니다. 대상에서 ‘PDF로 저장’을 고르세요.');
+    document.body.classList.add('printing');
+    try { window.print(); } catch (e2) { /* 무시 */ }
+    document.body.classList.remove('printing');
+  } finally {
+    wrap.remove();
+    btn.disabled = false; btn.textContent = 'PDF로 저장';
+  }
+}
+
+/* ───────── AI 심화 분석 (제미나이) ─────────
+ * 버튼을 누를 때만, 학생 이름을 별칭으로 바꾼 기록을 같은 사이트의 /api/analyze 로 보냅니다.
+ * 제미나이 키는 이 화면 코드에 없고, 서버(Cloudflare)의 비밀 변수에만 있습니다. */
+const AI_URL = String(window.TOKTOK_AI_URL || '/api/analyze');
+function aiScope() { const r = rangeInfo(), all = scopeLogs(); return { r: r, logs: between(all, r.from, r.end).sort(byTime), prev: between(all, r.pf, r.pt) }; }
+function aiKey() { const s = aiScope(); return [S.sid, UI.period, UI.bfilter, s.logs.length, s.logs.reduce((m, l) => Math.max(m, l.u || 0), 0)].join('|'); }
+function maskNames(t) {
+  let out = String(t == null ? '' : t);
+  S.cfg.students.forEach((x) => {
+    const nm = String(x.name || '').trim(), al = x.alias || '학생';
+    if (nm.length >= 2) out = out.split(nm).join(al);
+    if (nm.length >= 3) out = out.split(nm.slice(1)).join(al);
+  });
+  return out;
+}
+function aiPayload() {
+  const s = aiScope(), st = stu(S.sid), b = UI.bfilter ? beh(UI.bfilter) : null;
+  const label = { d1: '오늘', d7: '최근 7일', d30: '최근 30일', all: '전체 기간' }[UI.period];
+  return {
+    student: (st && st.alias) || '학생',
+    behavior: b ? maskNames(b.name) : '전체 행동',
+    period: { label: label, from: s.r.from, to: s.r.end },
+    prevFreq: s.r.pf ? s.prev.filter((l) => l.type === 'freq').length : null,
+    logs: s.logs.slice(-300).map((l) => ({ d: l.d, t: String(l.t || '').slice(0, 5), b: maskNames(l.bn || (beh(l.bid) || {}).name || ''), ty: l.type, lv: l.type === 'freq' ? l.lv : 0, sec: l.type === 'dur' ? l.sec : 0, a: maskNames(l.a), c: maskNames(l.c), fn: l.fn ? FN[l.fn] : '' }))
+  };
+}
+async function runAi() {
+  if (UI.ai && UI.ai.loading) return;
+  const s = aiScope();
+  if (!s.logs.length) { toast('분석할 기록이 없습니다. 기간을 넓혀 보세요.'); return; }
+  if (!confirm('선택한 기간의 기록 ' + s.logs.length + '건을 제미나이(구글 AI)로 보내 분석합니다.\n학생 이름은 ‘학생 A’ 같은 별칭으로 바뀌어 전송됩니다.\n직접 입력한 글에 다른 개인정보가 없는지 확인했나요? 계속할까요?')) return;
+  const key = aiKey(); UI.ai = { key: key, loading: true, text: '', err: '' }; renderReport();
+  try {
+    const res = await fetch(AI_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(aiPayload()) });
+    let data = null; try { data = await res.json(); } catch (e) { data = null; }
+    if (!res.ok || !data || !data.ok) throw new Error((data && data.error) || ('AI 서버에 연결하지 못했습니다 (' + res.status + ')'));
+    UI.ai = { key: key, loading: false, text: String(data.text || '').replace(/\*\*/g, ''), err: '' };
+  } catch (e) {
+    UI.ai = { key: key, loading: false, text: '', err: String((e && e.message) || e) };
+  }
+  renderReport();
+}
+function aiHtml() {
+  const a = UI.ai, ok = !!a && a.key === aiKey();
+  let x = '<div class="aibox"><div class="aih"><b>AI 심화 분석</b> <span class="mute small">제미나이 · 참고용</span></div>';
+  if (ok && a.loading) x += '<p class="small">분석하는 중입니다… (10~30초 걸릴 수 있어요)</p>';
+  else if (ok && a.err) x += '<p class="small err">' + esc(a.err) + '</p><button class="mini dk" data-act="ai">다시 시도</button>';
+  else if (ok && a.text) x += '<div class="aitext">' + esc(a.text).replace(/\n/g, '<br>') + '</div><p class="foot">AI가 만든 참고 의견입니다. 진단이나 평가를 대신하지 않으니 선생님의 관찰과 함께 판단해 주세요.</p><button class="mini" data-act="ai">다시 분석</button>';
+  else x += '<p class="small mute">위의 규칙 기반 리포트에 더해, 기록 전체를 읽고 패턴과 행동의 이유 가설, 중재 아이디어를 더 구체적으로 정리해 줍니다. 버튼을 누를 때만 이름을 뺀 기록이 전송됩니다.</p><button class="mini dk" data-act="ai">AI 심화 분석 받기</button>';
+  return x + '</div>';
+}
+function aiPdfHtml() {
+  const a = UI.ai; if (!a || a.key !== aiKey() || !a.text) return '';
+  return '<div class="pdf-sec"><h2>AI 심화 분석 (제미나이 · 참고용)</h2><p style="white-space:pre-wrap;line-height:1.7;font-size:12px">' + esc(a.text) + '</p></div>';
+}
+
+/* ───────── 설정 / 내보내기 / 백업 / 샘플 ───────── */
+function nextAlias() {
+  const used = S.cfg.students.map((s) => s.alias);
+  for (let i = 0; i < 26; i++) { const a = '학생 ' + String.fromCharCode(65 + i); if (used.indexOf(a) < 0) return a; }
+  return '학생 ' + (S.cfg.students.length + 1);
+}
+function nextCode() {
+  const nums = S.cfg.behaviors.map((b) => Number(String(b.code).replace(/\D/g, '')) || 0);
+  return 'F-' + (Math.max.apply(null, nums.concat([0])) + 1);
+}
+function connHtml() {
+  if (EMBED) {
+    return '<div class="connbox"><h4>서버 연결</h4><p class="small"><span class="sdot okdot"></span> 앱스크립트 주소로 열려 있어 구글 시트에 자동으로 연결되었습니다. 따로 입력할 것이 없습니다.</p></div>';
+  }
+  const on = connected(), rm = S.remote || {};
+  return '<div class="connbox" id="connBox"><h4>서버 연결 (구글 시트)</h4>' +
+    '<p class="small">' + (on ? '<span class="sdot okdot"></span> 연결되어 있습니다. 기록이 구글 시트에 저장됩니다.' : '<span class="sdot warndot"></span> 아직 구글 시트에 연결하지 않았습니다. 기록은 이 기기(브라우저)에만 저장됩니다. 여러 기기에서 쓰거나 기록을 안전하게 보관하려면 아래 안내대로 구글 시트를 연결하세요.') + '</p>' +
+    '<label class="flab" for="rUrl">웹 앱 주소</label><input class="inp" id="rUrl" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://script.google.com/macros/s/…/exec" value="' + esc(rm.url || '') + '">' +
+    '<label class="flab" for="rKey">비밀번호</label><input class="inp" id="rKey" type="password" autocomplete="off" spellcheck="false" placeholder="8자 이상" value="' + esc(rm.key || '') + '">' +
+    '<p class="small mute" style="margin-top:4px">처음 연결할 때 넣은 비밀번호가 그 시트의 비밀번호로 등록됩니다. 다른 기기에서도 같은 주소와 비밀번호를 넣으세요.</p>' +
+    '<div class="connbtns"><button class="mini dk" data-act="connect">' + (on ? '다시 연결' : '연결하기') + '</button>' + (on ? '<button class="mini" data-act="disconnect">연결 끊기</button>' : '') + '</div>' +
+    '<p id="rMsg" class="small" role="status"></p>' + guideHtml() + '</div>';
+}
+function guideHtml() {
+  const manual =
+    '<ol class="glist">' +
+    '<li><b>구글 시트 만들고 코드 붙여넣기</b><br><a class="mini dk linkbtn-a" href="https://sheets.new" target="_blank" rel="noopener">새 구글 시트 만들기</a><br>새 구글 시트가 열리면 메뉴 <b>확장 프로그램 → Apps Script</b>를 엽니다. Code.gs의 내용을 모두 지우고 아래 <b>서버 코드 복사</b>로 복사한 코드를 붙여넣은 뒤 저장합니다.</li>' +
+    deployLi() + connectLi() + '</ol>';
+  const easy = TEMPLATE_URL ?
+    '<ol class="glist">' +
+    '<li><b>내 기록 시트 만들기</b><br><a class="mini dk linkbtn-a" href="' + esc(TEMPLATE_URL) + '" target="_blank" rel="noopener">내 시트 만들기 (사본 만들기)</a><br><span class="mute">구글에 로그인한 뒤 ‘사본 만들기’를 누르면 내 드라이브에 기록용 시트가 생깁니다. 서버 코드도 함께 들어 있습니다.</span></li>' +
+    deployLi() + connectLi() + '</ol>' : '';
+  return '<details class="guidebox"' + (connected() ? '' : ' open') + '><summary>연결 방법 안내 (처음 한 번, 약 3분)</summary>' +
+    (TEMPLATE_URL ? easy : manual) +
+    '<p class="small mute">비밀번호를 잊었다면 내 시트의 메뉴 <b>톡톡 행동기록장 → 비밀번호 초기화</b>를 누른 뒤 다시 연결하세요. 기록은 지워지지 않습니다. 학교 계정은 관리자가 ‘모든 사용자’ 배포를 막아 두었을 수 있습니다.</p>' +
+    (TEMPLATE_URL ? '<details class="subguide"><summary>직접 설정하기 (사본 만들기가 안 될 때)</summary>' + manual + codeBlock() + '</details>' : codeBlock()) +
+    '</details>';
+}
+function deployLi() {
+  return '<li><b>웹 앱으로 배포</b><br>내 시트에서 <b>확장 프로그램 → Apps Script</b>를 열고, 오른쪽 위 <b>배포 → 새 배포</b> → 톱니바퀴에서 <b>웹 앱</b>을 고릅니다. 실행 사용자 <b>나</b>, 액세스 권한 <b>모든 사용자</b>로 두고 배포합니다. 권한 창이 뜨면 내 계정으로 허용합니다(‘확인되지 않은 앱’이 보이면 <b>고급 → 이동 → 허용</b>). 마지막 화면의 <b>웹 앱 주소</b>(…/exec)를 복사합니다.</li>';
+}
+function connectLi() {
+  return '<li><b>주소 붙여넣고 비밀번호 정하기</b><br>위 칸에 웹 앱 주소를 붙여넣고, 앞으로 쓸 <b>비밀번호(8자 이상)</b>를 정해 <b>연결하기</b>를 누릅니다. 위쪽 표시가 ‘저장됨’으로 바뀌면 끝입니다.</li>';
+}
+function codeBlock() {
+  return '<div class="codehead"><b>서버 코드 (Code.gs)</b><button class="mini" data-act="copyCode">서버 코드 복사</button></div>' +
+    '<textarea id="srvCode" class="codearea" readonly rows="7" aria-label="서버 코드"></textarea>';
+}
+function fillServerCode() {
+  const ta = document.getElementById('srvCode'), src = document.getElementById('serverCodeSrc');
+  if (ta && src) ta.value = src.textContent.replace(/^\n/, '');
+}
+function copyServerCode() {
+  const ta = document.getElementById('srvCode'); if (!ta) return;
+  const done = () => toast('서버 코드를 복사했습니다. Apps Script의 Code.gs에 붙여넣으세요.');
+  const fallback = () => { ta.focus(); ta.select(); let ok = false; try { ok = document.execCommand('copy'); } catch (e) { ok = false; } ok ? done() : toast('자동 복사가 막혀 있습니다. 코드 칸을 눌러 전체 선택 후 복사해 주세요.'); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(ta.value).then(done, fallback); else fallback();
+}
+function setMsg(text, kind) { const m = document.getElementById('rMsg'); if (m) { m.textContent = text; m.className = 'small ' + (kind || ''); } }
+async function connectRemote() {
+  const url = ($('#rUrl').value || '').trim(), key = ($('#rKey').value || '').trim();
+  if (!URL_RE.test(url)) { setMsg('웹 앱 주소 형식이 맞지 않습니다. https://script.google.com/ 으로 시작하고 /exec 로 끝나는 주소를 넣어 주세요.', 'err'); return; }
+  if (key.length < 8) { setMsg('비밀번호는 8자 이상으로 정해 주세요.', 'err'); return; }
+  const btn = document.querySelector('[data-act="connect"]'); if (btn) btn.disabled = true;
+  setMsg('연결을 확인하는 중…');
+  const prev = S.remote, sameServer = prev && prev.url === url;
+  S.remote = { url: url, key: key };
+  let res;
+  try { res = await run('ping'); if (!res || !res.ok) throw new Error((res && res.error) || '서버 응답 오류'); }
+  catch (e) { S.remote = prev; if (btn) btn.disabled = false; setMsg('연결하지 못했습니다. ' + ((e && e.message) || e), 'err'); return; }
+  if (!sameServer) {
+    const demoN = S.logs.filter((l) => l.demo).length;
+    S.logs = S.logs.filter((l) => !l.demo);
+    const mine = S.logs.filter((l) => !l.del);
+    if (mine.length && confirm('이 기기에만 저장된 기록이 ' + mine.length + '건 있습니다. 구글 시트로 함께 보낼까요?\n[취소]를 누르면 이 기록은 지우고 시트에 있는 기록만 불러옵니다.')) {
+      mine.forEach((l) => { S.dirty[l.id] = 1; });
+    } else { S.logs = []; S.dirty = {}; }
+    if (res.hasConfig) { S.cfg.u = 0; S.cfgDirty = false; } else { S.cfg.u = Date.now(); S.cfgDirty = true; }
+    S.since = 0; S.lastOk = 0;
+    if (demoN) toast('샘플 데이터 ' + demoN + '건은 연결하면서 지웠습니다');
+  }
+  UI.status = 'connecting'; save(); renderAll(); openSettings();
+  setMsg((res.claimed ? '비밀번호를 등록하고 연결했습니다. 비밀번호를 잊지 않도록 따로 적어 두세요. ' : '연결되었습니다. ') + '시트의 기록 ' + (res.total || 0) + '건을 불러옵니다.', 'ok');
+  syncNow();
+}
+function disconnectRemote() {
+  const n = pendingCount();
+  if (n && !confirm('아직 시트로 보내지 못한 변경이 ' + n + '건 있습니다. 그래도 연결을 끊을까요?')) return;
+  const wipe = confirm('연결을 끊습니다. 이 기기에 남은 기록 복사본도 지울까요?\n(구글 시트에 저장된 기록은 그대로 남습니다)');
+  S.remote = null; S.since = 0; S.lastOk = 0; S.dirty = {}; S.cfgDirty = false; S.url = '';
+  if (wipe) { S.logs = []; S.cfg = clone(DEFAULT_CFG); S.sid = S.cfg.students[0].id; }
+  save(); renderAll(); openSettings();
+  setMsg('연결을 끊었습니다. 지금은 이 기기에만 저장됩니다.', 'ok');
+}
+function openSettings() {
+  const m = $('#modal'); m.hidden = false;
+  const stRows = S.cfg.students.map((s) => '<div class="li"><input class="inp" data-sf="sname" data-id="' + esc(s.id) + '" value="' + esc(s.name) + '" maxlength="40"><span class="small mute">' + esc(s.alias) + '</span>' +
+    '<button class="mini" data-act="archStu" data-id="' + esc(s.id) + '">' + (s.archived ? '복원' : '보관') + '</button></div>').join('');
+  const bRows = S.cfg.behaviors.map((b) => '<div class="li"><input class="inp" data-sf="bname" data-id="' + esc(b.id) + '" value="' + esc(b.name) + '" maxlength="60"><span class="small mute">' + esc(b.code) + '</span>' +
+    '<button class="mini" data-act="archBeh" data-id="' + esc(b.id) + '">' + (b.archived ? '복원' : '보관') + '</button></div>').join('');
+  m.innerHTML = '<div class="mbox"><div class="rowb"><h3>설정과 데이터</h3><button class="icon" data-act="closeModal">닫기</button></div><div class="mbody">' +
+    connHtml() +
+    '<div><h4>관찰 대상 학생</h4>' + stRows + '<div class="li"><input class="inp" id="newStu" placeholder="학생 이름" maxlength="40"><button class="mini dk" data-act="addStu">추가</button></div><p class="small mute">‘보관’해도 지금까지의 기록은 그대로 남아 추이에 쓰입니다.</p></div>' +
+    '<div><h4>표적 행동</h4>' + bRows + '<div class="li"><input class="inp" id="newBeh" placeholder="행동 이름 (예: 자리 이탈)" maxlength="60"><button class="mini dk" data-act="addBeh">추가</button></div></div>' +
+    '<div><h4>데이터 보관</h4><p class="small mute" style="margin-bottom:8px">' + (connected() ? '모든 기록은 구글 시트의 ‘기록’ 탭에 계속 쌓입니다. 이 기기에도 함께 저장됩니다.' : '지금은 이 기기(브라우저)에만 저장됩니다. 정기적으로 백업을 받아 두세요.') + '</p>' +
+    '<div style="display:flex;flex-wrap:wrap;gap:6px"><button class="mini" data-act="exportCsv">CSV 내보내기</button><button class="mini" data-act="exportJson">백업 파일(JSON) 받기</button><label class="mini" style="display:inline-flex;align-items:center;cursor:pointer">백업 복원<input type="file" id="restoreFile" accept=".json,application/json" hidden></label>' +
+    (connected() ? '<button class="mini" data-act="syncNow">지금 동기화</button>' : '') + '</div>' +
+    (S.url ? '<p class="small" style="margin-top:8px"><a href="' + esc(S.url) + '" target="_blank" rel="noopener">구글 시트 열기 (본인만 접근 가능)</a></p>' : '') + '</div>' +
+        '<div class="small mute">학생 정보는 민감정보입니다. 실제 학생 이름 대신 별칭을 쓰거나 ‘이름 가리기’를 활용하고, 시트는 본인만 접근하게 두고 비밀번호는 다른 사람에게 알리지 마세요. 이 앱은 ‘AI 심화 분석’ 버튼을 누를 때만, 학생 이름을 뺀 기록을 제미나이(구글 AI)로 보냅니다. 그 외에는 외부 AI·API로 데이터를 보내지 않습니다.</div>' +
+    '</div></div>';
+  fillServerCode();
+}
+const csvCell = (v) => { let s = String(v == null ? '' : v); if (/^[=+\-@\t\r]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; };
+function download(name, mime, text) {
+  const url = URL.createObjectURL(new Blob([text], { type: mime }));
+  const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+function exportCsv() {
+  const rows = S.logs.filter(vis).sort(byTime);
+  let csv = '날짜,시각,학생,행동,유형,강도,지속(초),직전 상황(A),그 뒤 반응(C),행동의 이유(추정)\n';
+  rows.forEach((l) => {
+    const st = stu(l.sid);
+    csv += [l.d, l.t, st ? sdisp(st) : (S.stealth ? '(삭제된 학생)' : l.sn), ldispB(l), l.type === 'dur' ? '지속시간' : '빈도', l.type === 'dur' ? '' : LVL[l.lv], l.type === 'dur' ? l.sec : '', l.a, l.c, l.fn ? FN[l.fn] : ''].map(csvCell).join(',') + '\n';
+  });
+  download('toktok_records_' + today() + '.csv', 'text/csv;charset=utf-8', '﻿' + csv);
+  toast('CSV를 내보냈습니다 (' + rows.length + '건)');
+}
+function exportJson() {
+  download('toktok_backup_' + today() + '.json', 'application/json', JSON.stringify({ app: 'hangeoreum', v: 3, cfg: S.cfg, logs: S.logs.filter((l) => vis(l) && !l.demo) }));
+  toast('백업 파일을 만들었습니다');
+}
+function importJson(text) {
+  let p; try { p = JSON.parse(text); } catch (e) { toast('백업 파일을 읽지 못했습니다'); return; }
+  if (!p || p.app !== 'hangeoreum' || !Array.isArray(p.logs)) { toast('이 앱의 백업 파일이 아닙니다'); return; }
+  if (!confirm('백업의 기록 ' + p.logs.length + '건을 합칩니다. 같은 기록은 더 최근 수정본이 남습니다. 계속할까요?')) return;
+  const map = new Map(S.logs.map((l) => [l.id, l])); let added = 0;
+  p.logs.forEach((r) => {
+    if (!r || !r.id || !/^\d{4}-\d{2}-\d{2}$/.test(r.d || '')) return;
+    const mine = map.get(r.id);
+    if (!mine) { delete r.demo; S.logs.push(r); S.dirty[r.id] = 1; added++; }
+    else if ((r.u || 0) > (mine.u || 0)) { Object.assign(mine, r); S.dirty[r.id] = 1; added++; }
+  });
+  if (p.cfg && p.cfg.students) {
+    p.cfg.students.forEach((s) => { if (!stu(s.id)) S.cfg.students.push(s); });
+    (p.cfg.behaviors || []).forEach((b) => { if (!beh(b.id)) S.cfg.behaviors.push(b); });
+    touchCfg();
+  }
+  save(); scheduleSync(800); renderAll(); toast('백업에서 ' + added + '건을 합쳤습니다');
+}
+function rng(seed) { let x = seed; return () => { x = (x * 1664525 + 1013904223) % 4294967296; return x / 4294967296; }; }
+function addDemo() {
+  if (connected()) { toast('서버에 연결된 상태에서는 샘플을 넣을 수 없습니다'); return; }
+  if (S.logs.some((l) => l.demo)) { toast('이미 샘플이 들어 있습니다'); return; }
+  const st = activeStudents(), bs = activeBehaviors();
+  if (!st.length || !bs.length) { toast('학생과 표적행동이 있어야 샘플을 넣을 수 있습니다'); return; }
+  const rand = rng(7);
+  const mk = (sid, b, dayStr, hour, o) => {
+    const t = pad(hour) + ':' + pad(Math.floor(rand() * 60)) + ':' + pad(Math.floor(rand() * 60));
+    S.logs.push(Object.assign({ id: 'demo_' + uid() + Math.floor(rand() * 1e6), d: dayStr, t: t, sid: sid.id, sn: sid.name, bid: b.id, bc: b.code, bn: b.name, a: '', c: '', fn: '', u: Date.now(), demo: true }, o));
+  };
+  for (let i = 13; i >= 0; i--) {
+    const dayStr = addDays(today(), -i), wd = new Date(dayStr.replace(/-/g, '/')).getDay();
+    if (wd === 0 || wd === 6) continue;
+    const n1 = Math.max(1, Math.round(7 - (13 - i) * 0.35 + rand() * 2));
+    for (let k = 0; k < n1; k++) {
+      const lv = rand() < (i > 8 ? 0.3 : 0.1) ? 3 : (rand() < 0.5 ? 2 : 1);
+      mk(st[0], bs[0], dayStr, 9 + Math.floor(rand() * 5), { type: 'freq', lv: lv, a: rand() < 0.75 ? '개별 과제 제시' : '교사 구두 지시', c: rand() < 0.6 ? '과제 난이도 조절/경감' : '진정 공간(타임아웃) 이동', fn: rand() < 0.7 ? 'escape' : '' });
+    }
+    if (rand() < 0.6) mk(st[0], bs[Math.min(2, bs.length - 1)], dayStr, 10 + Math.floor(rand() * 3), { type: 'dur', lv: 0, sec: 60 + Math.floor(rand() * 240), a: '모둠 협동 활동', c: '계획된 무시', fn: 'escape' });
+    if (st[1]) {
+      const n2 = 2 + Math.floor(rand() * 3);
+      for (let k = 0; k < n2; k++) mk(st[1], bs[Math.min(1, bs.length - 1)], dayStr, 10 + Math.floor(rand() * 5), { type: 'freq', lv: rand() < 0.6 ? 1 : 2, a: '쉬는 시간/이동', c: '구두 주의/경고', fn: rand() < 0.8 ? 'attention' : '' });
+    }
+  }
+  save(); renderAll(); toast('가상의 샘플 기록을 넣었습니다');
+}
+function clearDemo() {
+  const n = S.logs.filter((l) => l.demo).length;
+  S.logs = S.logs.filter((l) => !l.demo);
+  save(); renderAll(); toast(n ? '샘플 ' + n + '건을 지웠습니다' : '지울 샘플이 없습니다');
+}
+
+/* ───────── 표지 ───────── */
+function showCover() {
+  if ($('#modal') && !$('#modal').hidden) $('#modal').hidden = true;
+  const c = $('#coverStealth'); if (c) c.checked = !!S.stealth;
+  const m = $('#coverMeta');
+  if (m) m.textContent = connected() ? '내 구글 시트와 연결됨' : '기록은 이 기기에만 저장 · 설정에서 구글 시트 연결';
+  $('#cover').hidden = false; document.body.classList.add('covered');
+}
+
+/* ───────── 전체 그리기 ───────── */
+function renderAll() {
+  renderStatus(); renderChips(); renderTabs();
+  if (UI.step === 1) renderStep1(); else if (UI.step === 2) renderList(); else renderDash();
+}
+
+/* ───────── 이벤트 ───────── */
+const ACT = {
+  enter: () => {
+    const c = $('#coverStealth'); if (c && S.stealth !== c.checked) { S.stealth = c.checked; save(); }
+    $('#cover').hidden = true; document.body.classList.remove('covered'); renderAll();
+    try { window.scrollTo(0, 0); } catch (e) { /* 무시 */ }
+  },
+  showCover: () => showCover(),
+  syncNow: () => syncNow(),
+  stealth: () => { S.stealth = !S.stealth; save(); renderAll(); if (!$('#modal').hidden) openSettings(); },
+  openSettings: () => openSettings(),
+  closeModal: () => { $('#modal').hidden = true; renderAll(); },
+  step: (d) => { UI.step = Number(d.v); UI.openId = null; if (UI.step === 2) UI.day = today(); renderAll(); try { window.scrollTo(0, 0); } catch (e) { /* 무시 */ } },
+  pick: (d) => { S.sid = d.v; UI.openId = null; save(); renderAll(); },
+  freq: (d) => recordFreq(d.b, Number(d.lv)),
+  start: (d) => startTimer(d.b),
+  stop: (d) => stopTimer(d.b),
+  discard: (d) => discardTimer(d.b),
+  del: (d) => deleteLog(d.id),
+  undo: () => { const u = toast.undo; $('#toast').hidden = true; toast.undo = null; if (u) u(); },
+  toggle: (d) => { UI.openId = UI.openId === d.id ? null : d.id; renderList(); },
+  closeRow: (d) => { const l = S.logs.find((x) => x.id === d.id); if (l) { l.a = l.a.trim(); l.c = l.c.trim(); touch(l); save(); } UI.openId = null; renderList(); renderDash(); renderTabs(); },
+  chip: (d) => { const l = S.logs.find((x) => x.id === d.id); if (!l) return; l[d.f] = l[d.f] === d.v ? '' : d.v; touch(l); renderList(); },
+  setLv: (d) => { const l = S.logs.find((x) => x.id === d.id); if (!l) return; l.lv = Number(d.lv); touch(l); renderList(); renderDash(); },
+  dayPrev: () => { UI.day = addDays(UI.day, -1); UI.openId = null; renderList(); renderDash(); },
+  dayNext: () => { UI.day = addDays(UI.day, 1); UI.openId = null; renderList(); renderDash(); },
+  dayToday: () => { UI.day = today(); UI.openId = null; renderList(); renderDash(); },
+  period: (d) => { UI.period = d.v; renderDash(); },
+  chart: (d) => { UI.chart = d.v; renderDash(); },
+  savePdf: () => savePdf(),
+  connect: () => connectRemote(),
+  disconnect: () => disconnectRemote(),
+  ai: () => runAi(),
+  copyCode: () => copyServerCode(),
+  addStu: () => { const i = $('#newStu'); const name = i.value.trim(); if (!name) return; const s = { id: 's' + uid(), name: name, alias: nextAlias() }; S.cfg.students.push(s); S.sid = s.id; touchCfg(); save(); openSettings(); },
+  addBeh: () => { const i = $('#newBeh'); const name = i.value.trim(); if (!name) return; S.cfg.behaviors.push({ id: 'b' + uid(), name: name, code: nextCode() }); touchCfg(); save(); openSettings(); },
+  archStu: (d) => { const s = stu(d.id); if (!s) return; if (!s.archived && activeStudents().length <= 1) { toast('학생이 한 명은 남아 있어야 합니다'); return; } s.archived = !s.archived; if (s.archived && S.sid === s.id) S.sid = activeStudents()[0].id; touchCfg(); save(); openSettings(); },
+  archBeh: (d) => { const b = beh(d.id); if (!b) return; b.archived = !b.archived; touchCfg(); save(); openSettings(); },
+  exportCsv: () => exportCsv(),
+  exportJson: () => exportJson(),
+  addDemo: () => { addDemo(); openSettings(); },
+  clearDemo: () => { clearDemo(); if (!$('#modal').hidden) openSettings(); }
+};
+document.addEventListener('click', (e) => {
+  const el = e.target.closest('[data-act]'); if (!el) return;
+  const f = ACT[el.getAttribute('data-act')]; if (f) f(el.dataset, el, e);
+});
+document.addEventListener('input', (e) => {
+  const t = e.target;
+  if (t.dataset && (t.dataset.field === 'a' || t.dataset.field === 'c')) {
+    const l = S.logs.find((x) => x.id === t.dataset.id); if (!l) return;
+    l[t.dataset.field] = t.value; touch(l);
+    const h = document.getElementById('hint_' + l.id); if (h) h.innerHTML = hintHtml(l);
+  }
+});
+document.addEventListener('change', (e) => {
+  const t = e.target, d = t.dataset || {};
+  if (d.field === 'fn') { const l = S.logs.find((x) => x.id === d.id); if (!l) return; l.fn = t.value; touch(l); const h = document.getElementById('hint_' + l.id); if (h) h.innerHTML = hintHtml(l); renderDash(); }
+  else if (d.field === 'day') { if (/^\d{4}-\d{2}-\d{2}$/.test(t.value)) { UI.day = t.value; UI.openId = null; renderList(); renderDash(); } }
+  else if (d.field === 'bfilter') { UI.bfilter = t.value; renderDash(); }
+  else if (d.sf === 'sname') { const s = stu(d.id); if (s && t.value.trim()) { s.name = t.value.trim(); touchCfg(); save(); renderChips(); } }
+  else if (d.sf === 'bname') { const b = beh(d.id); if (b && t.value.trim()) { b.name = t.value.trim(); touchCfg(); save(); } }
+  else if (t.id === 'restoreFile' && t.files && t.files[0]) { const r = new FileReader(); r.onload = () => importJson(String(r.result)); r.readAsText(t.files[0]); t.value = ''; }
+});
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') save(); else scheduleSync(300); });
+window.addEventListener('pagehide', save);
+window.addEventListener('online', () => scheduleSync(300));
+window.addEventListener('load', () => renderDash());
+document.addEventListener('toggle', (e) => { const t = e.target; if (t && t.tagName === 'DETAILS' && t.dataset.h) UI.openSec[t.dataset.h] = t.open; }, true);
+
+/* ───────── 시작 ───────── */
+load();
+renderAll();
+showCover();
+setInterval(tick, 1000);
+if (connected()) syncNow();
+window.__hgb = { get S() { return S; }, get UI() { return UI; }, buildReport: buildReport, inferFn: inferFn, ACT: ACT, syncNow: syncNow, renderAll: renderAll, makeReport: makeReport, savePdf: savePdf, buildPdfArea: buildPdfArea, importJson: importJson, addDemo: addDemo };
+})();
+</script>
+</body>
+</html>

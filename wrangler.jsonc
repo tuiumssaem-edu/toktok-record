@@ -1,0 +1,11 @@
+{
+  // Cloudflare 대시보드에서 만든 Worker 이름과 같아야 합니다.
+  "name": "toktok-record",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-11-03",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  }
+}
