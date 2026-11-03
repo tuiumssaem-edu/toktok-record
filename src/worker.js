@@ -8,7 +8,7 @@
  * - 선택 변수: GEMINI_MODEL (기본값 gemini-3.8-flash)
  */
 
-const DEFAULT_MODEL = 'gemini-3.8-flash';
+const DEFAULT_MODEL = 'gemini-3.6-flash';
 const MAX_BODY = 120000;
 const MAX_LOGS = 300;
 const TIMEOUT_MS = 50000;
