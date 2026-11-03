@@ -3,6 +3,9 @@
   "name": "toktok-record",
   "main": "src/worker.js",
   "compatibility_date": "2026-11-03",
+  // Google이 일부 지역 서버에서 오는 Gemini 호출을 막아서(User location is not supported), 지원 지역(미국) 근처에서 실행합니다.
+  // 화면(정적 파일)은 이 설정과 상관없이 가까운 곳에서 바로 열립니다.
+  "placement": { "region": "gcp:us-central1" },
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",
