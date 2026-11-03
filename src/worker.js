@@ -143,9 +143,11 @@ async function analyze(request, env, url) {
   } finally { clearTimeout(timer); }
 
   if (!res.ok) {
-    console.log('gemini status', res.status);
+    let why = '';
+    try { const e = await res.json(); why = String((e && e.error && (e.error.status || e.error.message)) || '').replace(/AIza[\w-]+/g, '[키]').slice(0, 140); } catch (e) { /* 사유 없음 */ }
+    console.log('gemini status', res.status, why);
     if (res.status === 429) return fail('요청이 몰렸거나 사용 한도를 넘었습니다. 잠시 뒤 다시 시도해 주세요.', 429);
-    if (res.status === 400 || res.status === 403) return fail('AI 키 또는 모델 설정을 확인해 주세요. (코드 ' + res.status + ')', 502);
+    if (res.status === 400 || res.status === 403) return fail('AI 키 또는 모델 설정을 확인해 주세요. (코드 ' + res.status + (why ? ' · ' + why : '') + ')', 502);
     return fail('제미나이 호출에 실패했습니다. 잠시 뒤 다시 시도해 주세요. (코드 ' + res.status + ')', 502);
   }
   let data;
