@@ -110,7 +110,7 @@ function buildUserText(p) {
   return lines.join('\n');
 }
 
-async function analyze(request, env, url) {
+export async function analyze(request, env, url) {
   if (request.headers.get('Origin') !== url.origin) return fail('이 사이트에서 보낸 요청만 받을 수 있습니다.', 403);
   if (!env.GEMINI_API_KEY) return fail('서버에 AI 키가 설정되지 않았습니다. 관리자에게 알려 주세요.', 500);
 
